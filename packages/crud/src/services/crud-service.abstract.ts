@@ -1,8 +1,8 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ParsedRequestParams } from '@nestjsx/crud-request';
-import { objKeys } from '@nestjsx/util';
+import { objKeys } from 'nest-crud-client';
 
 import { CreateManyDto, CrudRequest, CrudRequestOptions, GetManyDefaultResponse, QueryOptions } from '../interfaces';
+import { ParsedRequestParams } from '../request-parse/parsed-request.interface';
 
 export abstract class CrudService<T> {
   throwBadRequestException(msg?: unknown): BadRequestException {
@@ -76,9 +76,9 @@ export abstract class CrudService<T> {
    * @param options
    */
   getPrimaryParams(options: CrudRequestOptions): string[] {
-    const params = objKeys(options.params).filter((n) => options.params[n] && options.params[n].primary);
+    const params = objKeys(options.params).filter((n) => options.params![n] && options.params![n].primary);
 
-    return params.map((p) => options.params[p].field);
+    return params.map((p) => options.params![p].field) as string[];
   }
 
   abstract getMany(req: CrudRequest): Promise<GetManyDefaultResponse<T> | T[]>;

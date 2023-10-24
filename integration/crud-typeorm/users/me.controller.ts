@@ -1,6 +1,6 @@
+import { Crud, CrudAuth } from '@fuhidev/crud';
 import { Controller } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Crud, CrudAuth } from '@nestjsx/crud';
 
 import { User } from './user.entity';
 import { UsersService } from './users.service';

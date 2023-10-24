@@ -1,12 +1,12 @@
-import { ClassType } from '@nestjsx/util';
+import { ClassType } from '@fuhidev/util';
 import { plainToClass } from 'class-transformer';
-import { MigrationInterface, Repository, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner, Repository } from 'typeorm';
 import { Company } from './companies';
+import { Note } from './notes';
 import { Project, UserProject } from './projects';
 import { Name, User } from './users';
 import { License, UserLicense } from './users-licenses';
 import { UserProfile } from './users-profiles';
-import { Note } from './notes';
 
 export class Seeds1544303473346 implements MigrationInterface {
   private save<T>(repo: Repository<T>, data: Partial<T>[]): Promise<T[]> {

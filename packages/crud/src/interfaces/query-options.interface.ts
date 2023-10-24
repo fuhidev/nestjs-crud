@@ -1,8 +1,4 @@
-import {
-  QueryFields,
-  QuerySort,
-} from '@nestjsx/crud-request/lib/types/request-query.types';
-
+import { QueryFields, QuerySort } from 'nest-crud-client';
 import { QueryFilterOption } from '../types';
 
 export interface QueryOptions {

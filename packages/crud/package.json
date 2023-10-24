@@ -1,48 +1,23 @@
 {
-  "name": "@nestjsx/crud",
+  "name": "nest-crud-server",
   "description": "NestJs CRUD for RESTful APIs",
-  "version": "5.0.0-alpha.3",
+  "version": "9.1.0",
   "license": "MIT",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "./dist/nest-crud-server.js",
+  "module": "./dist/nest-crud-server.mjs",
+  "typings": "./dist/nest-crud-server.d.ts",
+  "files": [
+    "./dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "deploy": "npm run build && npm publish"
+  },
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "lib"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nestjsx/crud.git"
-  },
-  "bugs": {
-    "url": "https://github.com/nestjsx/crud/issues"
-  },
-  "keywords": [
-    "typescript",
-    "typeorm",
-    "nest",
-    "nestjs",
-    "rest",
-    "restful",
-    "api",
-    "crud",
-    "crud-generator",
-    "backend",
-    "frameworks"
-  ],
-  "author": {
-    "name": "Michael Yali",
-    "email": "mihon4ik@gmail.com"
-  },
-  "scripts": {
-    "build": "npx tsc -b"
-  },
   "dependencies": {
-    "@nestjsx/crud-request": "^5.0.0-alpha.3",
-    "@nestjsx/util": "^5.0.0-alpha.3",
-    "deepmerge": "^3.2.0",
-    "pluralize": "^8.0.0"
+    "nest-crud-client": "^4.0.1"
   },
   "peerDependencies": {
     "class-transformer": "*",

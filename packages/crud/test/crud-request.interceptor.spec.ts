@@ -1,9 +1,9 @@
 import { Controller, Get, Param, ParseIntPipe, Query, UseInterceptors } from '@nestjs/common';
 import { NestApplication } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
-import { RequestQueryBuilder } from '@nestjsx/crud-request';
+import { RequestQueryBuilder } from 'nest-crud-client';
 import * as supertest from 'supertest';
-import { Crud, ParsedRequest, CrudAuth, Override } from '../src/decorators';
+import { Crud, CrudAuth, Override, ParsedRequest } from '../src/decorators';
 import { CrudRequestInterceptor } from '../src/interceptors';
 import { CrudRequest } from '../src/interfaces';
 import { TestModel } from './__fixture__/models';

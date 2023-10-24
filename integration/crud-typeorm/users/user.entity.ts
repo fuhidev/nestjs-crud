@@ -1,31 +1,14 @@
-import {
-  Entity,
-  Column,
-  JoinColumn,
-  OneToOne,
-  OneToMany,
-  ManyToOne,
-  ManyToMany,
-  DeleteDateColumn,
-} from 'typeorm';
-import {
-  IsOptional,
-  IsString,
-  MaxLength,
-  IsNotEmpty,
-  IsEmail,
-  IsBoolean,
-  ValidateNested,
-} from 'class-validator';
+import { CrudValidationGroups } from '@fuhidev/crud';
 import { Type } from 'class-transformer';
-import { CrudValidationGroups } from '@nestjsx/crud';
+import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 
 import { BaseEntity } from '../base-entity';
-import { UserProfile } from '../users-profiles/user-profile.entity';
-import { UserLicense } from '../users-licenses/user-license.entity';
 import { Company } from '../companies/company.entity';
 import { Project } from '../projects/project.entity';
 import { UserProject } from '../projects/user-project.entity';
+import { UserLicense } from '../users-licenses/user-license.entity';
+import { UserProfile } from '../users-profiles/user-profile.entity';
 
 const { CREATE, UPDATE } = CrudValidationGroups;
 

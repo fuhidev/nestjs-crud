@@ -1,4 +1,4 @@
-import { ParsedRequestParams } from '@nestjsx/crud-request';
+import { ParsedRequestParams } from 'nest-crud-client';
 
 import { CrudRequestOptions } from '../interfaces';
 

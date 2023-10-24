@@ -1,11 +1,10 @@
 import { HttpStatus } from '@nestjs/common';
-import { RequestQueryBuilder } from '@nestjsx/crud-request';
-import { isString, objKeys } from '@nestjsx/util';
+import { DELIMSTR_CHAR, DELIM_CHAR, RequestQueryBuilder, isString, objKeys } from 'nest-crud-client';
 import { MergedCrudOptions, ParamsOptions } from '../interfaces';
 import { BaseRouteName } from '../types';
 import { safeRequire } from '../util';
+import pluralize from '../util/pluralize';
 import { R } from './reflection.helper';
-const pluralize = require('pluralize');
 
 export const swagger = safeRequire('@nestjs/swagger', () => require('@nestjs/swagger'));
 export const swaggerConst = safeRequire('@nestjs/swagger/dist/constants', () =>
@@ -524,8 +523,8 @@ export class Swagger {
     };
 
     return {
-      delim: qbOptions.delim,
-      delimStr: qbOptions.delimStr,
+      delim: DELIM_CHAR,
+      delimStr: DELIMSTR_CHAR,
       fields: name('fields'),
       search: name('search'),
       filter: name('filter'),

@@ -1,8 +1,7 @@
-import { RequestQueryBuilder } from '@nestjsx/crud-request';
-import { isObjectFull } from '@nestjsx/util';
-import * as deepmerge from 'deepmerge';
+import { RequestQueryBuilder, isObjectFull } from 'nest-crud-client';
 
 import { CrudGlobalConfig } from '../interfaces';
+import deepmerge from '../util/deepmerge';
 
 export class CrudConfigService {
   static config: CrudGlobalConfig = {

@@ -5,12 +5,12 @@ export interface RoutesOptions {
   only?: BaseRouteName[];
   getManyBase?: GetManyRouteOptions;
   getOneBase?: GetOneRouteOptions;
-  createOneBase?: CreateOneRouteOptions;
-  createManyBase?: CreateManyRouteOptions;
-  updateOneBase?: UpdateOneRouteOptions;
-  replaceOneBase?: ReplaceOneRouteOptions;
-  deleteOneBase?: DeleteOneRouteOptions;
-  recoverOneBase?: RecoverOneRouteOptions;
+  createOneBase: CreateOneRouteOptions;
+  createManyBase: CreateManyRouteOptions;
+  updateOneBase: UpdateOneRouteOptions;
+  replaceOneBase: ReplaceOneRouteOptions;
+  deleteOneBase: DeleteOneRouteOptions;
+  recoverOneBase: RecoverOneRouteOptions;
 }
 
 export interface BaseRouteOptions {

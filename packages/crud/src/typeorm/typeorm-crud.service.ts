@@ -1,34 +1,40 @@
+import { plainToClass } from 'class-transformer';
 import {
-  CreateManyDto,
-  CrudRequest,
-  CrudRequestOptions,
-  CrudService,
-  GetManyDefaultResponse,
-  JoinOption,
-  JoinOptions,
-  QueryOptions,
-} from '@nestjsx/crud';
-import {
-  ParsedRequestParams,
+  ComparisonOperator,
   QueryFilter,
   QueryJoin,
   QuerySort,
   SCondition,
   SConditionKey,
-  ComparisonOperator,
-} from '@nestjsx/crud-request';
-import { ClassType, hasLength, isArrayFull, isObject, isUndefined, objKeys, isNil, isNull } from '@nestjsx/util';
-import { oO } from '@zmotivat0r/o0';
-import { plainToClass } from 'class-transformer';
+  hasLength,
+  isArrayFull,
+  isNil,
+  isNull,
+  isObject,
+  isUndefined,
+  objKeys,
+} from 'nest-crud-client';
 import {
   Brackets,
+  DataSourceOptions,
   DeepPartial,
+  EntityMetadata,
   ObjectLiteral,
   Repository,
   SelectQueryBuilder,
-  DataSourceOptions,
-  EntityMetadata,
 } from 'typeorm';
+import {
+  CreateManyDto,
+  CrudRequest,
+  CrudRequestOptions,
+  GetManyDefaultResponse,
+  JoinOption,
+  QueryOptions,
+} from '../interfaces';
+import { ClassType } from '../request-parse/class.type';
+import { ParsedRequestParams } from '../request-parse/parsed-request.interface';
+import { CrudService } from '../services';
+import { oO } from '../util/oO';
 
 interface IAllowedRelation {
   alias?: string;
@@ -130,7 +136,6 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
       if (!primaryParams.length && primaryParams.some((p) => isNil(saved[p]))) {
         return saved;
       } else {
-        req.parsed.search = primaryParams.reduce((acc, p) => ({ ...acc, [p]: saved[p] }), {});
         return this.getOneOrFail(req);
       }
     }
@@ -225,7 +230,6 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
         return replaced;
       }
 
-      req.parsed.search = primaryParams.reduce((acc, p) => ({ ...acc, [p]: replaced[p] }), {});
       return this.getOneOrFail(req);
     }
   }
@@ -237,13 +241,12 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
   public async deleteOne(req: CrudRequest): Promise<void | T> {
     const { returnDeleted } = req.options.routes.deleteOneBase;
     const found = await this.getOneOrFail(req, returnDeleted);
-    const toReturn = returnDeleted
+    const toReturn: T | undefined = returnDeleted
       ? plainToClass(this.entityType, { ...found }, req.parsed.classTransformOptions)
       : undefined;
-    const deleted =
-      req.options.query.softDelete === true
-        ? await this.repo.softRemove(found as unknown as DeepPartial<T>)
-        : await this.repo.remove(found);
+    req.options.query.softDelete === true
+      ? await this.repo.softRemove(found as unknown as DeepPartial<T>)
+      : await this.repo.remove(found);
     return toReturn;
   }
 
@@ -294,6 +297,7 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
         if (joinOptions[allowedJoins[i]].eager) {
           const cond = parsed.join.find((j) => j && j.field === allowedJoins[i]) || {
             field: allowedJoins[i],
+            select: [],
           };
           this.setJoin(cond, joinOptions, builder);
           eagerJoins[allowedJoins[i]] = true;
@@ -312,7 +316,7 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
 
     // if soft deleted is enabled add where statement to filter deleted records
     if (this.entityHasDeleteColumn && options.query.softDelete) {
-      if (parsed.includeDeleted === 1 || withDeleted) {
+      if (withDeleted) {
         builder.withDeleted();
       }
     }
@@ -336,12 +340,6 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
       if (isFinite(skip)) {
         builder.skip(skip);
       }
-    }
-
-    // set cache
-    /* istanbul ignore else */
-    if (options.query.cache && parsed.cache !== 0) {
-      builder.cache(builder.getQueryAndParameters(), options.query.cache);
     }
 
     return builder;
@@ -425,9 +423,11 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
       return undefined;
     }
 
-    return dto instanceof this.entityType
-      ? Object.assign(dto, parsed.authPersist)
-      : plainToClass(this.entityType, { ...dto, ...parsed.authPersist }, parsed.classTransformOptions);
+    return (
+      dto instanceof this.entityType
+        ? Object.assign(dto, parsed.authPersist)
+        : plainToClass(this.entityType, { ...dto, ...parsed.authPersist }, parsed.classTransformOptions)
+    ) as T;
   }
 
   protected getAllowedColumns(columns: string[], options: QueryOptions): string[] {
@@ -547,7 +547,7 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
     }
   }
 
-  protected setJoin(cond: QueryJoin, joinOptions: JoinOptions, builder: SelectQueryBuilder<T>) {
+  protected setJoin(cond: QueryJoin, joinOptions: JoinOption, builder: SelectQueryBuilder<T>) {
     const options = joinOptions[cond.field];
 
     if (!options) {
@@ -572,7 +572,7 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
 
       const select = new Set(
         [...allowedRelation.primaryColumns, ...(isArrayFull(options.persist) ? options.persist : []), ...columns].map(
-          (col) => `${alias}.${col}`,
+          (col: string) => `${alias}.${col}`,
         ),
       );
 
@@ -794,7 +794,7 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
         ...(options.persist && options.persist.length ? options.persist : []),
         ...columns,
         ...this.entityPrimaryColumns,
-      ].map((col) => `${this.alias}.${col}`),
+      ].map((col: string) => `${this.alias}.${col}`),
     );
 
     return Array.from(select);
@@ -810,7 +810,7 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
 
   protected getFieldWithAlias(field: string, sort = false) {
     /* istanbul ignore next */
-    const i = ['mysql','mariadb'].includes(this.dbName) ? '`' : '"';
+    const i = ['mysql', 'mariadb'].includes(this.dbName) ? '`' : '"';
     const cols = field.split('.');
 
     switch (cols.length) {

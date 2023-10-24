@@ -1,39 +1,38 @@
+import { ClassTransformOptions } from 'class-transformer';
 import {
+  ComparisonOperator,
+  DELIMSTR_CHAR,
+  DELIM_CHAR,
+  ObjectLiteral,
+  ParamsOptions,
+  QueryFields,
+  QueryFilter,
+  QueryJoin,
+  QuerySort,
+  RequestQueryBuilder,
+  RequestQueryBuilderOptions,
+  RequestQueryException,
+  SCondition,
+  SConditionAND,
+  SFields,
   hasLength,
   hasValue,
-  isString,
   isArrayFull,
   isDate,
   isDateString,
+  isNil,
   isObject,
+  isString,
   isStringFull,
   objKeys,
-  isNil,
-  ObjectLiteral,
-} from '@nestjsx/util';
-import { ClassTransformOptions } from 'class-transformer';
-
-import { RequestQueryException } from './exceptions';
-import { ParamsOptions, ParsedRequestParams, RequestQueryBuilderOptions } from './interfaces';
-import { RequestQueryBuilder } from './request-query.builder';
-import {
   validateCondition,
   validateJoin,
   validateNumeric,
   validateParamOption,
   validateSort,
   validateUUID,
-} from './request-query.validator';
-import {
-  ComparisonOperator,
-  QueryFields,
-  QueryFilter,
-  QueryJoin,
-  QuerySort,
-  SCondition,
-  SConditionAND,
-  SFields,
-} from './types';
+} from 'nest-crud-client';
+import { ParsedRequestParams } from './parsed-request.interface';
 
 // tslint:disable:variable-name ban-types
 export class RequestQueryParser implements ParsedRequestParams {
@@ -62,8 +61,6 @@ export class RequestQueryParser implements ParsedRequestParams {
   public page: number;
 
   public cache: number;
-
-  public includeDeleted: number;
 
   private _params: any;
 
@@ -95,8 +92,6 @@ export class RequestQueryParser implements ParsedRequestParams {
       limit: this.limit,
       offset: this.offset,
       page: this.page,
-      cache: this.cache,
-      includeDeleted: this.includeDeleted,
     };
   }
 
@@ -120,10 +115,6 @@ export class RequestQueryParser implements ParsedRequestParams {
         this.offset = this.parseQueryParam('offset', this.numericParser.bind(this, 'offset'))[0];
         this.page = this.parseQueryParam('page', this.numericParser.bind(this, 'page'))[0];
         this.cache = this.parseQueryParam('cache', this.numericParser.bind(this, 'cache'))[0];
-        this.includeDeleted = this.parseQueryParam(
-          'includeDeleted',
-          this.numericParser.bind(this, 'includeDeleted'),
-        )[0];
       }
     }
 
@@ -227,7 +218,7 @@ export class RequestQueryParser implements ParsedRequestParams {
   }
 
   private fieldsParser(data: string): QueryFields {
-    return data.split(this._options.delimStr);
+    return data.split(DELIMSTR_CHAR);
   }
 
   private parseSearchQueryParam(d: any): SCondition {
@@ -251,13 +242,13 @@ export class RequestQueryParser implements ParsedRequestParams {
   private conditionParser(cond: 'filter' | 'or' | 'search', data: string): QueryFilter {
     const isArrayValue = ['in', 'notin', 'between', '$in', '$notin', '$between', '$inL', '$notinL'];
     const isEmptyValue = ['isnull', 'notnull', '$isnull', '$notnull'];
-    const param = data.split(this._options.delim);
+    const param = data.split(DELIM_CHAR);
     const field = param[0];
     const operator = param[1] as ComparisonOperator;
     let value = param[2] || '';
 
     if (isArrayValue.some((name) => name === operator)) {
-      value = value.split(this._options.delimStr) as any;
+      value = value.split(DELIMSTR_CHAR) as any;
     }
 
     value = this.parseValues(value);
@@ -273,10 +264,10 @@ export class RequestQueryParser implements ParsedRequestParams {
   }
 
   private joinParser(data: string): QueryJoin {
-    const param = data.split(this._options.delim);
+    const param = data.split(DELIM_CHAR);
     const join: QueryJoin = {
       field: param[0],
-      select: isStringFull(param[1]) ? param[1].split(this._options.delimStr) : undefined,
+      select: isStringFull(param[1]) ? param[1].split(DELIMSTR_CHAR) : undefined,
     };
     validateJoin(join);
 
@@ -284,7 +275,7 @@ export class RequestQueryParser implements ParsedRequestParams {
   }
 
   private sortParser(data: string): QuerySort {
-    const param = data.split(this._options.delimStr);
+    const param = data.split(DELIMSTR_CHAR);
     const sort: QuerySort = {
       field: param[0],
       order: param[1] as any,

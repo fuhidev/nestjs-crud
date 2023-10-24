@@ -1,13 +1,13 @@
-import * as request from 'supertest';
-import { Test } from '@nestjs/testing';
 import { Controller, INestApplication } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
-import { RequestQueryBuilder } from '@nestjsx/crud-request';
+import { Test } from '@nestjs/testing';
+import { RequestQueryBuilder } from 'nest-crud-client';
+import * as request from 'supertest';
 
-import { Crud, Override, ParsedRequest, ParsedBody } from '../src/decorators';
-import { CrudController, CrudRequest, CreateManyDto } from '../src/interfaces';
 import { R, Swagger } from '../src/crud';
+import { Crud, Override, ParsedBody, ParsedRequest } from '../src/decorators';
 import { CrudActions } from '../src/enums';
+import { CreateManyDto, CrudController, CrudRequest } from '../src/interfaces';
 import { HttpExceptionFilter } from './__fixture__/exception.filter';
 import { TestModel } from './__fixture__/models';
 import { TestService } from './__fixture__/services';

@@ -1,6 +1,6 @@
-import { join } from 'path';
+import { isNil } from '@fuhidev/util';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { isNil } from '@nestjsx/util';
+import { join } from 'path';
 
 const type = (process.env.TYPEORM_CONNECTION as any) || 'postgres';
 

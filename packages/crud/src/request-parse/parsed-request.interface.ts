@@ -1,6 +1,5 @@
-import { ObjectLiteral } from '@nestjsx/util';
 import { ClassTransformOptions } from 'class-transformer';
-import { QueryFields, QueryFilter, QueryJoin, QuerySort, SCondition } from '../types';
+import { ObjectLiteral, QueryFields, QueryFilter, QueryJoin, QuerySort, SCondition } from 'nest-crud-client';
 
 export interface ParsedRequestParams {
   fields: QueryFields;
@@ -15,6 +14,4 @@ export interface ParsedRequestParams {
   limit: number;
   offset: number;
   page: number;
-  cache: number;
-  includeDeleted: number;
 }

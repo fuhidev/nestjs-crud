@@ -1,8 +1,8 @@
-import * as request from 'supertest';
-import { Test } from '@nestjs/testing';
 import { Controller, INestApplication } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
-import { RequestQueryBuilder } from '@nestjsx/crud-request';
+import { Test } from '@nestjs/testing';
+import { RequestQueryBuilder } from 'nest-crud-client';
+import * as request from 'supertest';
 
 import { Crud } from '../src/decorators/crud.decorator';
 import { CreateManyDto } from '../src/interfaces';
