@@ -1,7 +1,7 @@
 {
   "name": "nest-crud-server",
   "description": "NestJs CRUD for RESTful APIs",
-  "version": "9.1.7",
+  "version": "9.1.8",
   "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

@@ -1,24 +1,24 @@
 {
- "name": "nest-crud-client",
- "version": "4.0.2",
- "files": [
-  "dist"
- ],
- "main": "./dist/nest-crud-client.js",
- "module": "./dist/nest-crud-client.mjs",
- "typings": "./dist/nest-crud-client.d.ts",
- "publishConfig": {
-  "access": "public"
- },
- "scripts": {
-  "build": "npx vite build",
-  "deploy": "npm run build && npm publish"
- },
- "devDependencies": {
-  "vite": "^4.4.9",
-  "vite-plugin-dts": "^3.5.2"
- },
- "peerDependencies": {
-  "axios": ">=0.21.1"
- }
+  "name": "nest-crud-client",
+  "version": "4.0.3",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/nest-crud-client.js",
+  "module": "./dist/nest-crud-client.mjs",
+  "typings": "./dist/nest-crud-client.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "npx vite build",
+    "deploy": "npm run build && npm publish"
+  },
+  "devDependencies": {
+    "vite": "^4.4.9",
+    "vite-plugin-dts": "^3.5.2"
+  },
+  "peerDependencies": {
+    "axios": ">=0.21.1"
+  }
 }
