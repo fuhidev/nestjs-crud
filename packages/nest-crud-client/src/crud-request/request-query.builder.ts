@@ -237,8 +237,14 @@ export class RequestQueryBuilder<T = any> {
           )
           .join(',');
       }
+    } else if (x === null) {
+      if (filter.operator === '$eq') {
+        filter.operator = '$isnull';
+      } else if (filter.operator === '$ne') {
+        filter.operator = '$notnull';
+      }
     }
-    const result = `${filter.field}${d}${filter.operator}${d}${value}`;
+    const result = `${filter.field}${d}${filter.operator}${d}${value ? value : ''}`;
     return result;
   }
 
