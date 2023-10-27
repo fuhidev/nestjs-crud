@@ -225,7 +225,7 @@ export class RequestQueryBuilder<T = any> {
     let value = '';
     let x = filter.value;
     if (hasValue(x)) {
-      if (typeof x === 'number') {
+      if (typeof x === 'number' || typeof x === 'number') {
         value = x.toString();
       } else if (typeof x === 'string') {
         if (x.startsWith('"') && x.endsWith('"')) value = x;
