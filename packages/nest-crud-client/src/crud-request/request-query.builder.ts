@@ -17,6 +17,7 @@ import {
   QueryJoins,
   QuerySort,
   SCondition,
+  SFiledValues,
   SpatialReference,
 } from './types';
 
@@ -223,28 +224,27 @@ export class RequestQueryBuilder<T = any> {
     validateCondition(filter, cond);
     const d = DELIM_CHAR;
     let value = '';
-    let x = filter.value;
-    if (hasValue(x)) {
-      if (typeof x === 'number' || typeof x === 'boolean') {
-        value = x.toString();
-      } else if (typeof x === 'string') {
-        if (x.startsWith('"') && x.endsWith('"')) value = x;
-        else value = `"${x}"`;
-      } else if (Array.isArray(x)) {
-        value = x
-          .map((item) =>
-            typeof item === 'string' ? (item.startsWith('"') && item.endsWith('"') ? item : `"${item}"`) : item,
-          )
-          .join(',');
+    if ((filter as Object).hasOwnProperty('value')) {
+      let x = (filter as any).value as SFiledValues;
+      if (filter.operator === '$between' || filter.operator === '$in') {
+        if (!Array.isArray(x)) throw new Error('operation is $between, $in then value require Array');
       }
-    } else if (x === null) {
-      if (filter.operator === '$eq') {
-        filter.operator = '$isnull';
-      } else if (filter.operator === '$ne') {
-        filter.operator = '$notnull';
+      if (hasValue(x)) {
+        if (typeof x === 'number' || typeof x === 'boolean') {
+          value = x.toString();
+        } else if (typeof x === 'string') {
+          if (x.startsWith('"') && x.endsWith('"')) value = x;
+          else value = `"${x}"`;
+        } else if (Array.isArray(x)) {
+          value = x
+            .map((item) =>
+              typeof item === 'string' ? (item.startsWith('"') && item.endsWith('"') ? item : `"${item}"`) : item,
+            )
+            .join(',');
+        }
       }
     }
-    const result = `${filter.field}${d}${filter.operator}${d}${value ? value : ''}`;
+    const result = `${filter.field}${d}${filter.operator}${d}${value ?? ''}`;
     return result;
   }
 
