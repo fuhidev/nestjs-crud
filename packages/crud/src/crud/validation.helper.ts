@@ -3,7 +3,6 @@ import { isFalse, isNil } from 'nest-crud-client';
 import { CrudValidationGroups } from '../enums';
 import { CreateManyDto, CrudOptions, MergedCrudOptions } from '../interfaces';
 import { safeRequire } from '../util';
-import { ApiProperty } from './swagger.helper';
 
 const validator = safeRequire('class-validator', () => require('class-validator'));
 const transformer = safeRequire('class-transformer', () => require('class-transformer'));
@@ -34,7 +33,6 @@ export class Validation {
 
       // tslint:disable-next-line:max-classes-per-file
       class BulkDtoImpl implements CreateManyDto<T> {
-        @ApiProperty({ type: Model, isArray: true })
         @IsArray({ groups, always })
         @ArrayNotEmpty({ groups, always })
         @ValidateNested({ each: true, groups, always })

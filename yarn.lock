@@ -742,6 +742,15 @@
     "tslib" "2.6.2"
     "uid" "2.0.2"
 
+"@nestjs/common@>=9.0.0":
+  "integrity" "sha512-dyAd48ux/eFYj1uEnQAisSVWq54ttEfeHJBDljvAc6hXbBNHTzZfq/fUH6DmlK29WdGXNMVabCjfduwX2EPquQ=="
+  "resolved" "https://registry.npmjs.org/@nestjs/common/-/common-9.0.0.tgz"
+  "version" "9.0.0"
+  dependencies:
+    "iterare" "1.2.1"
+    "tslib" "2.4.0"
+    "uuid" "8.3.2"
+
 "@nestjs/core@^10.0.0", "@nestjs/core@^10.2.6", "@nestjs/core@^8.0.0 || ^9.0.0 || ^10.0.0", "@nestjs/core@^9.0.0 || ^10.0.0":
   "integrity" "sha512-oGQ2CoBeFRT7egG47MFqS89xlXBTIRZBkRpKRTPMftEfL1RMXhXIcIIaGfzp11wx6qxrBVxBXpVLM09oaqHpaQ=="
   "resolved" "https://registry.npmjs.org/@nestjs/core/-/core-10.2.6.tgz"
@@ -863,6 +872,14 @@
   "integrity" "sha512-IFjIgTusQym2B5IZJG3XKr5llka7ey84fw/NOYqESP5WUfQs9zz1ww/9+qoz4ka/S6KcGBodzlCeZ5UImKbscg=="
   "resolved" "https://registry.npmjs.org/@redis/time-series/-/time-series-1.0.5.tgz"
   "version" "1.0.5"
+
+"@rollup/pluginutils@^4.1.1":
+  "integrity" "sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ=="
+  "resolved" "https://registry.npmjs.org/@rollup/pluginutils/-/pluginutils-4.2.1.tgz"
+  "version" "4.2.1"
+  dependencies:
+    "estree-walker" "^2.0.1"
+    "picomatch" "^2.2.2"
 
 "@rollup/pluginutils@^5.0.2":
   "integrity" "sha512-0KJnIoRI8A+a1dqOYLxH8vBf8bphDmty5QvIm2hqm7oFCFYKCAZWWd2hXgMibaPsNDhI0AtpYfQZJG47pt/k4g=="
@@ -1863,7 +1880,7 @@
   "resolved" "https://registry.npmjs.org/cjs-module-lexer/-/cjs-module-lexer-1.2.2.tgz"
   "version" "1.2.2"
 
-"class-transformer@*", "class-transformer@^0.4.0 || ^0.5.0", "class-transformer@>=0.4.0", "class-transformer@0.5.1":
+"class-transformer@*", "class-transformer@^0.4.0 || ^0.5.0", "class-transformer@0.5.1":
   "integrity" "sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw=="
   "resolved" "https://registry.npmjs.org/class-transformer/-/class-transformer-0.5.1.tgz"
   "version" "0.5.1"
@@ -2798,7 +2815,7 @@
   "resolved" "https://registry.npmjs.org/estraverse/-/estraverse-5.3.0.tgz"
   "version" "5.3.0"
 
-"estree-walker@^2.0.2":
+"estree-walker@^2.0.1", "estree-walker@^2.0.2":
   "integrity" "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="
   "resolved" "https://registry.npmjs.org/estree-walker/-/estree-walker-2.0.2.tgz"
   "version" "2.0.2"
@@ -4747,17 +4764,15 @@
   "resolved" "https://registry.npmjs.org/neo-async/-/neo-async-2.6.2.tgz"
   "version" "2.6.2"
 
-"nest-crud-client@^4.0.1":
-  "integrity" "sha512-amQS4oxKZVa7mfDloXgM60ErknbygTx0vxPbNDGZZA/BbOra1INWyn2wJIiTmTMYIlAiZ5vkUMDt7BTls1KI1A=="
-  "resolved" "https://registry.npmjs.org/nest-crud-client/-/nest-crud-client-4.0.1.tgz"
-  "version" "4.0.1"
+"nest-crud-client@^4.0.1", "nest-crud-client@file:D:\\Programing\\LIBRARY\\crud\\packages\\nest-crud-client":
+  "resolved" "file:packages/nest-crud-client"
+  "version" "4.0.2"
 
 "nest-crud-server@file:D:\\Programing\\LIBRARY\\crud\\packages\\crud":
   "resolved" "file:packages/crud"
-  "version" "9.0.1"
+  "version" "9.1.6"
   dependencies:
     "nest-crud-client" "^4.0.1"
-    "pluralize" "^8.0.0"
 
 "node-fetch@^2.6.1":
   "integrity" "sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ=="
@@ -5171,7 +5186,7 @@
   "resolved" "https://registry.npmjs.org/picocolors/-/picocolors-1.0.0.tgz"
   "version" "1.0.0"
 
-"picomatch@^2.0.4", "picomatch@^2.2.1", "picomatch@^2.2.3", "picomatch@^2.3.1":
+"picomatch@^2.0.4", "picomatch@^2.2.1", "picomatch@^2.2.2", "picomatch@^2.2.3", "picomatch@^2.3.1":
   "integrity" "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="
   "resolved" "https://registry.npmjs.org/picomatch/-/picomatch-2.3.1.tgz"
   "version" "2.3.1"
@@ -6169,6 +6184,11 @@
   "resolved" "https://registry.npmjs.org/tslib/-/tslib-2.6.2.tgz"
   "version" "2.6.2"
 
+"tslib@2.4.0":
+  "integrity" "sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ=="
+  "resolved" "https://registry.npmjs.org/tslib/-/tslib-2.4.0.tgz"
+  "version" "2.4.0"
+
 "tunnel-agent@^0.6.0":
   "integrity" "sha1-J6XeoGs2sEoKmWZ3SykIaPD8QP0= sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w=="
   "resolved" "https://registry.npmjs.org/tunnel-agent/-/tunnel-agent-0.6.0.tgz"
@@ -6378,6 +6398,11 @@
   "resolved" "https://registry.npmjs.org/uuid/-/uuid-9.0.0.tgz"
   "version" "9.0.0"
 
+"uuid@8.3.2":
+  "integrity" "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg=="
+  "resolved" "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz"
+  "version" "8.3.2"
+
 "v8-compile-cache-lib@^3.0.1":
   "integrity" "sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg=="
   "resolved" "https://registry.npmjs.org/v8-compile-cache-lib/-/v8-compile-cache-lib-3.0.1.tgz"
@@ -6419,7 +6444,7 @@
     "core-util-is" "1.0.2"
     "extsprintf" "^1.2.0"
 
-"vite-plugin-dts@^3.5.4":
+"vite-plugin-dts@^3.5.2", "vite-plugin-dts@^3.5.4":
   "integrity" "sha512-BJLBj1Vg9kV7ZMXAULT9UGogrElwz5s+k8TzC7LsFkHv5Jy90OWnHKUp8qm7sypu2pkF5pTJ5McUuHudnT0Imw=="
   "resolved" "https://registry.npmjs.org/vite-plugin-dts/-/vite-plugin-dts-3.5.4.tgz"
   "version" "3.5.4"
@@ -6431,6 +6456,15 @@
     "kolorist" "^1.8.0"
     "vue-tsc" "^1.8.8"
 
+"vite-plugin-node@^3.0.2":
+  "integrity" "sha512-pA/QZDe4VRFUSChTrR64EfdsnwHbTnkXKx1Be8MP2oW43TPeQgtIfqiGOuXTPUKjwINtyEl8JMzRN0+dYyfTow=="
+  "resolved" "https://registry.npmjs.org/vite-plugin-node/-/vite-plugin-node-3.0.2.tgz"
+  "version" "3.0.2"
+  dependencies:
+    "@rollup/pluginutils" "^4.1.1"
+    "chalk" "^4.1.2"
+    "debug" "^4.3.2"
+
 "vite-tsconfig-paths@^4.2.1":
   "integrity" "sha512-GNUI6ZgPqT3oervkvzU+qtys83+75N/OuDaQl7HmOqFTb0pjZsuARrRipsyJhJ3enqV8beI1xhGbToR4o78nSQ=="
   "resolved" "https://registry.npmjs.org/vite-tsconfig-paths/-/vite-tsconfig-paths-4.2.1.tgz"
@@ -6440,10 +6474,10 @@
     "globrex" "^0.1.2"
     "tsconfck" "^2.1.0"
 
-"vite@*", "vite@^4.4.9":
-  "integrity" "sha512-2mbUn2LlUmNASWwSCNSJ/EG2HuSRTnVNaydp6vMCm5VIqJsjMfbIWtbH2kDuwUVW5mMUKKZvGPX/rqeqVvv1XA=="
-  "resolved" "https://registry.npmjs.org/vite/-/vite-4.4.9.tgz"
-  "version" "4.4.9"
+"vite@*", "vite@^4.0.0", "vite@^4.4.9", "vite@^4.5.0":
+  "integrity" "sha512-ulr8rNLA6rkyFAlVWw2q5YJ91v098AFQ2R0PRFwPzREXOUJQPtFUG0t+/ZikhaOCDqFoDhN6/v8Sq0o4araFAw=="
+  "resolved" "https://registry.npmjs.org/vite/-/vite-4.5.0.tgz"
+  "version" "4.5.0"
   dependencies:
     "esbuild" "^0.18.10"
     "postcss" "^8.4.27"

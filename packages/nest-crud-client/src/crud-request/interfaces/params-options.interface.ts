@@ -1,5 +1,4 @@
-import { SwaggerEnumType } from '@nestjs/swagger/dist/types/swagger-enum.type';
-import { ParamOptionType } from 'nest-crud-client';
+import { ParamOptionType } from '../types';
 
 export interface ParamsOptions {
   [key: string]: ParamOption;
@@ -8,7 +7,6 @@ export interface ParamsOptions {
 export interface ParamOption {
   field?: string;
   type?: ParamOptionType;
-  enum?: SwaggerEnumType;
   primary?: boolean;
   disabled?: boolean;
 }

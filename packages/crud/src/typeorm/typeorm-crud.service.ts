@@ -46,7 +46,7 @@ interface IAllowedRelation {
   allowedColumns: string[];
 }
 
-export class TypeOrmCrudService<T> extends CrudService<T> {
+export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> {
   protected dbName: DataSourceOptions['type'];
 
   protected entityColumns: string[];
@@ -414,7 +414,7 @@ export class TypeOrmCrudService<T> extends CrudService<T> {
 
     if (hasLength(parsed.paramsFilter)) {
       for (const filter of parsed.paramsFilter) {
-        dto[filter.field] = filter.value;
+        (dto as any)[filter.field] = filter.value;
       }
     }
 

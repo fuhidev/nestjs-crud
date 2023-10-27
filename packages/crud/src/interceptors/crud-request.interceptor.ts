@@ -3,7 +3,6 @@ import { ClassTransformOptions } from 'class-transformer';
 import {
   QueryFilter,
   RequestQueryException,
-  RequestQueryParser,
   SCondition,
   hasLength,
   isArrayFull,
@@ -14,6 +13,7 @@ import {
 import { PARSED_CRUD_REQUEST_KEY } from '../constants';
 import { CrudActions } from '../enums';
 import { CrudRequest, MergedCrudOptions } from '../interfaces';
+import { RequestQueryParser } from '../request-parse/request-query.parse';
 import { QueryFilterFunction } from '../types';
 import { CrudBaseInterceptor } from './crud-base.interceptor';
 

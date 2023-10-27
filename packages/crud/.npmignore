@@ -1,0 +1,5 @@
+
+# Loại trừ tất cả các tệp và thư mục ngoại trừ package.json và thư mục dist
+*
+!package.json
+!dist/

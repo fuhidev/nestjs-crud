@@ -4,9 +4,7 @@ import { CrudActions } from '../enums';
 import { MergedCrudOptions } from '../interfaces';
 
 export class CrudBaseInterceptor {
-  protected getCrudInfo(
-    context: ExecutionContext,
-  ): {
+  protected getCrudInfo(context: ExecutionContext): {
     ctrlOptions: MergedCrudOptions;
     crudOptions: Partial<MergedCrudOptions>;
     action: CrudActions;
@@ -16,11 +14,11 @@ export class CrudBaseInterceptor {
     const ctrlOptions = R.getCrudOptions(ctrl);
     const crudOptions = ctrlOptions
       ? ctrlOptions
-      : {
+      : ({
           query: {},
           routes: {},
           params: {},
-        };
+        } as MergedCrudOptions);
     const action = R.getAction(handler);
 
     return { ctrlOptions, crudOptions, action };

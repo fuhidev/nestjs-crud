@@ -1,7 +1,6 @@
-import { RequestQueryBuilderOptions } from 'nest-crud-client';
+import { ParamsOptions, RequestQueryBuilderOptions } from 'nest-crud-client';
 
 import { AuthGlobalOptions } from './auth-options.interface';
-import { ParamsOptions } from './params-options.interface';
 import { RoutesOptions } from './routes-options.interface';
 
 export interface CrudGlobalConfig {

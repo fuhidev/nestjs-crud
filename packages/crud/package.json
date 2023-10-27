@@ -1,11 +1,11 @@
 {
   "name": "nest-crud-server",
   "description": "NestJs CRUD for RESTful APIs",
-  "version": "9.1.0",
+  "version": "9.1.7",
   "license": "MIT",
-  "main": "./dist/nest-crud-server.js",
-  "module": "./dist/nest-crud-server.mjs",
-  "typings": "./dist/nest-crud-server.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "typings": "./dist/index.d.ts",
   "files": [
     "./dist"
   ],
@@ -20,7 +20,11 @@
     "nest-crud-client": "^4.0.1"
   },
   "peerDependencies": {
+    "@nestjs/common": ">=9.0.0",
     "class-transformer": "*",
     "class-validator": "*"
+  },
+  "devDependencies": {
+    "vite-plugin-node": "^3.0.2"
   }
 }
