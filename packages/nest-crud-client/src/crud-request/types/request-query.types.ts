@@ -1,49 +1,7 @@
-import { GeoJsonObject } from './geojson';
+// import * as ArcGIS from './arcgis';
+import { GeoJSON } from './geojson';
 
 export type QueryFields<T = any> = Array<keyof T>;
-
-export interface SpatialReference {
-  wkid?: number;
-  wkt?: string;
-}
-
-export interface BaseGeometry {
-  spatialReference: SpatialReference;
-}
-
-export interface Point extends BaseGeometry {
-  x: number;
-  y: number;
-  z?: number;
-  m?: number;
-}
-
-export interface Polyline extends BaseGeometry {
-  paths: number[][];
-}
-
-export interface Polygon extends BaseGeometry {
-  rings: number[][][];
-}
-
-export interface Multipoint extends BaseGeometry {
-  points: number[][];
-}
-
-export interface Envelope extends BaseGeometry {
-  xmin: number;
-  xmax: number;
-  ymin: number;
-  ymax: number;
-
-  zmin?: number;
-  zmax?: number;
-
-  mmin?: number;
-  mmax?: number;
-}
-
-export type Geometry = Polyline | Polygon | Multipoint | Point | Envelope;
 
 export enum SpatialMethodEnum {
   Intersects = 'intersects',
@@ -52,8 +10,7 @@ export enum SpatialMethodEnum {
 }
 
 export interface QueryFilterGeo {
-  geometry: Geometry | GeoJsonObject;
-  fGeo?: 'geojson' | 'esri';
+  geometry: GeoJSON.BaseGeometry;
   method?: SpatialMethodEnum;
 }
 

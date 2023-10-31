@@ -22,6 +22,7 @@ import {
 } from './types';
 
 // tslint:disable:variable-name ban-types
+
 export class RequestQueryBuilder<T = any> {
   constructor() {
     this.setParamNames();
