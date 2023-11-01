@@ -1,5 +1,5 @@
 import { GeoJSON } from "nest-crud-client";
-import * as wkx from "wkx";
+import wkx from "wkx";
 export const wktToGeoJson = (wkt: string) => {
  return wkx.Geometry.parse(wkt).toGeoJSON();
 };
