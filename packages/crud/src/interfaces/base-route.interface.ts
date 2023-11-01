@@ -1,12 +1,13 @@
-import { RequestMethod } from '@nestjs/common';
+import { RequestMethod } from "@nestjs/common";
 
-import { BaseRouteName } from '../types';
+import { BaseRouteName } from "../types";
 
 export interface BaseRoute {
-  name: BaseRouteName;
-  path: string;
-  method: RequestMethod;
-  enable: boolean;
-  override: boolean;
-  withParams: boolean;
+ relation?: BaseRouteName;
+ name: BaseRouteName;
+ path: string;
+ method: RequestMethod;
+ enable: boolean;
+ override: boolean;
+ withParams: boolean;
 }

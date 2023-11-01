@@ -1,5 +1,12 @@
-import { Controller } from '@nestjs/common';
-import { Crud } from 'nest-crud-server';
+import { Controller, UseInterceptors } from '@nestjs/common';
+import {
+  Crud,
+  CrudRequest,
+  CrudRequestInterceptor,
+  Override,
+  ParsedBody,
+  ParsedRequest,
+} from 'nest-crud-server';
 import { PostService } from './post.service';
 
 @Crud({
@@ -7,19 +14,19 @@ import { PostService } from './post.service';
     primaryKey: 'postId',
   },
   routes: {
-    only: [
-      'getManyBase',
-      'getOneBase',
-      'updateOneBase',
-      'deleteOneBase',
-      'createOneBase',
-    ],
-  },
-  query: {
-    persist: ['physicalPath'],
+    exclude: ['getCountBase'],
+    updateOneBase: {
+      // allowParamsOverride: true,
+    },
   },
 })
 @Controller('post')
 export class PostController {
   constructor(private service: PostService) {}
+
+  @Override('createOneBase')
+  @UseInterceptors(CrudRequestInterceptor)
+  createOneBase(@ParsedRequest() req: CrudRequest, @ParsedBody() dto) {
+    return this.service.createOne(req, dto);
+  }
 }

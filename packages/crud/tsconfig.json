@@ -1,16 +1,14 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
-    "moduleResolution": "Node",
-    "outDir": "./dist",
-    "declaration": true,
-    "noImplicitAny": false,
-    "noUnusedLocals": false,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
-  },
-  "include": ["src"]
+ "compilerOptions": {
+  "target": "ES2021",
+  "module": "CommonJS",
+  "outDir": "./dist",
+  "declaration": true,
+  "noImplicitAny": false,
+  "noUnusedLocals": false,
+  "removeComments": true,
+  "emitDecoratorMetadata": true,
+  "experimentalDecorators": true
+ },
+ "include": ["src"]
 }

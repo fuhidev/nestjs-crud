@@ -7,7 +7,7 @@ import { ProductService } from './product.service';
     primaryKey: 'productId',
   },
   routes: {
-    only: ['getManyBase', 'getOneBase', 'updateOneBase', 'deleteOneBase'],
+    only: ['getOneBase', 'updateOneBase', 'deleteOneBase'],
   },
   query: {
     maxLimit: 20,

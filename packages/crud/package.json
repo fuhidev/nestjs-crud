@@ -1,34 +1,35 @@
 {
-  "name": "nest-crud-server",
-  "description": "NestJs CRUD for RESTful APIs",
-  "version": "9.1.9",
-  "license": "MIT",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/nest-crud-server.d.ts",
-  "files": [
-    "./dist"
-  ],
-  "scripts": {
-    "build": "vite build",
-    "deploy": "npm run build && npm publish"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "nest-crud-client": "^5.0.0",
-    "proj4": "^2.9.2",
-    "wkx": "^0.5.0"
-  },
-  "peerDependencies": {
-    "@nestjs/common": ">=9.0.0",
-    "class-transformer": "*",
-    "class-validator": "*",
-    "typeorm": ">=0.3.0"
-  },
-  "devDependencies": {
-    "@types/proj4": "^2.5.4",
-    "vite-plugin-node": "^3.0.2"
-  }
+ "name": "nest-crud-server",
+ "description": "NestJs CRUD for RESTful APIs",
+ "version": "9.1.9",
+ "license": "MIT",
+ "main": "./dist/index.js",
+ "module": "./dist/index.mjs",
+ "typings": "./dist/index.d.ts",
+ "files": [
+  "./dist"
+ ],
+ "scripts": {
+  "build:test": "tsc",
+  "build": "tsc && vite build",
+  "deploy": "npm run build && npm publish"
+ },
+ "publishConfig": {
+  "access": "public"
+ },
+ "dependencies": {
+  "nest-crud-client": "^5.0.0",
+  "proj4": "^2.9.2",
+  "wkx": "^0.5.0"
+ },
+ "peerDependencies": {
+  "@nestjs/common": ">=9.0.0",
+  "class-transformer": "*",
+  "class-validator": "*",
+  "typeorm": ">=0.3.0"
+ },
+ "devDependencies": {
+  "@types/proj4": "^2.5.4",
+  "vite-plugin-node": "^3.0.2"
+ }
 }
