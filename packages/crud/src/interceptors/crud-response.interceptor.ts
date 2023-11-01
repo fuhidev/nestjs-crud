@@ -2,7 +2,6 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nes
 import { ClassTransformOptions, classToPlain, classToPlainFromExist } from 'class-transformer';
 import { isFalse, isFunction, isObject } from 'nest-crud-client';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { CrudActions } from '../enums';
 import { SerializeOptions } from '../interfaces';
 import { CrudBaseInterceptor } from './crud-base.interceptor';
@@ -24,7 +23,7 @@ const actionToDtoNameMap: {
 @Injectable()
 export class CrudResponseInterceptor extends CrudBaseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    return next.handle().pipe(map((data) => this.serialize(context, data)));
+    return next.handle();
   }
 
   protected transform(dto: any, data: any, options: ClassTransformOptions) {
@@ -39,39 +38,5 @@ export class CrudResponseInterceptor extends CrudBaseInterceptor implements Nest
     return data instanceof dto
       ? classToPlain(data, options)
       : classToPlain(classToPlainFromExist(data, new dto()), options);
-  }
-
-  protected serialize(context: ExecutionContext, data: any): any {
-    const req = context.switchToHttp().getRequest();
-    const { crudOptions, action } = this.getCrudInfo(context);
-    const { serialize } = crudOptions;
-    const dto = serialize[actionToDtoNameMap[action]];
-    const isArray = Array.isArray(data);
-
-    const options: ClassTransformOptions = {};
-    /* istanbul ignore else */
-    if (isFunction(crudOptions.auth?.classTransformOptions)) {
-      const userOrRequest = crudOptions.auth.property ? req[crudOptions.auth.property] : req;
-      Object.assign(options, crudOptions.auth.classTransformOptions(userOrRequest));
-    }
-
-    /* istanbul ignore else */
-    if (isFunction(crudOptions.auth?.groups)) {
-      const userOrRequest = crudOptions.auth.property ? req[crudOptions.auth.property] : req;
-      options.groups = crudOptions.auth.groups(userOrRequest);
-    }
-
-    switch (action) {
-      case CrudActions.ReadAll:
-        return isArray
-          ? (data as any[]).map((item) => this.transform(serialize.get, item, options))
-          : this.transform(dto, data, options);
-      case CrudActions.CreateMany:
-        return isArray
-          ? (data as any[]).map((item) => this.transform(dto, item, options))
-          : this.transform(dto, data, options);
-      default:
-        return this.transform(dto, data, options);
-    }
   }
 }

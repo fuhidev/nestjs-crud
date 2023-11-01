@@ -8,4 +8,6 @@ export enum CrudActions {
   DeleteOne = 'Delete-One',
   DeleteAll = 'Delete-All',
   RecoverOne = 'Recover-One',
+  ReadCount = 'Read-Count',
+  ReadSum = 'Read-Sum',
 }

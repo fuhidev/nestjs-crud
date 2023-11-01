@@ -1,12 +1,11 @@
-import { ClassTransformOptions } from 'class-transformer';
 import {
-  ComparisonOperator,
+  CondOperator,
   DELIMSTR_CHAR,
   DELIM_CHAR,
-  ObjectLiteral,
-  ParamsOptions,
+  Envelope,
   QueryFields,
   QueryFilter,
+  QueryFilterGeo,
   QueryJoin,
   QuerySort,
   RequestQueryBuilder,
@@ -28,21 +27,14 @@ import {
   validateCondition,
   validateJoin,
   validateNumeric,
-  validateParamOption,
   validateSort,
-  validateUUID,
 } from 'nest-crud-client';
+import { CrudParamOption } from '../interfaces';
 import { ParsedRequestParams } from './parsed-request.interface';
 
 // tslint:disable:variable-name ban-types
 export class RequestQueryParser implements ParsedRequestParams {
   public fields: QueryFields = [];
-
-  public paramsFilter: QueryFilter[] = [];
-
-  public authPersist: ObjectLiteral = undefined;
-
-  public classTransformOptions: ClassTransformOptions = undefined;
 
   public search: SCondition;
 
@@ -67,8 +59,14 @@ export class RequestQueryParser implements ParsedRequestParams {
   private _query: any;
 
   private _paramNames: string[];
+  public paramsFilter: QueryFilter[] = [];
 
-  private _paramsOptions: ParamsOptions;
+  private _paramsOptions: CrudParamOption;
+
+  public outSR?: number;
+  public bbox?: Envelope;
+  public filterGeo?: QueryFilterGeo;
+  public inSR?: number;
 
   private get _options(): RequestQueryBuilderOptions {
     return RequestQueryBuilder.getOptions();
@@ -81,10 +79,8 @@ export class RequestQueryParser implements ParsedRequestParams {
   getParsed(): ParsedRequestParams {
     return {
       fields: this.fields,
-      paramsFilter: this.paramsFilter,
-      authPersist: this.authPersist,
-      classTransformOptions: this.classTransformOptions,
       search: this.search,
+      paramsFilter: this.paramsFilter,
       filter: this.filter,
       or: this.or,
       join: this.join,
@@ -92,6 +88,10 @@ export class RequestQueryParser implements ParsedRequestParams {
       limit: this.limit,
       offset: this.offset,
       page: this.page,
+      outSR: this.outSR,
+      bbox: this.bbox,
+      filterGeo: this.filterGeo,
+      inSR: this.inSR,
     };
   }
 
@@ -121,26 +121,17 @@ export class RequestQueryParser implements ParsedRequestParams {
     return this;
   }
 
-  parseParams(params: any, options: ParamsOptions): this {
+  parseParams(params: any, options: CrudParamOption): this {
     if (isObject(params)) {
       const paramNames = objKeys(params);
 
       if (hasLength(paramNames)) {
         this._params = params;
         this._paramsOptions = options;
-        this.paramsFilter = paramNames.map((name) => this.paramParser(name)).filter((filter) => filter);
       }
     }
 
     return this;
-  }
-
-  setAuthPersist(persist: ObjectLiteral = {}) {
-    this.authPersist = persist || /* istanbul ignore next */ {};
-  }
-
-  setClassTransformOptions(options: ClassTransformOptions = {}) {
-    this.classTransformOptions = options || /* istanbul ignore next */ {};
   }
 
   convertFilterToSearch(filter: QueryFilter): SFields | SConditionAND {
@@ -152,7 +143,7 @@ export class RequestQueryParser implements ParsedRequestParams {
     return filter
       ? {
           [filter.field]: {
-            [filter.operator]: isEmptyValue[filter.operator] ? isEmptyValue[filter.operator] : filter.value,
+            [filter.operator]: isEmptyValue[filter.operator] ? isEmptyValue[filter.operator] : filter['value'],
           },
         }
       : /* istanbul ignore next */ {};
@@ -244,7 +235,7 @@ export class RequestQueryParser implements ParsedRequestParams {
     const isEmptyValue = ['isnull', 'notnull', '$isnull', '$notnull'];
     const param = data.split(DELIM_CHAR);
     const field = param[0];
-    const operator = param[1] as ComparisonOperator;
+    const operator = param[1] as CondOperator;
     let value = param[2] || '';
 
     if (isArrayValue.some((name) => name === operator)) {
@@ -257,7 +248,7 @@ export class RequestQueryParser implements ParsedRequestParams {
       throw new RequestQueryException(`Invalid ${cond} value`);
     }
 
-    const condition: QueryFilter = { field, operator, value };
+    const condition: QueryFilter = { field, operator, value } as QueryFilter;
     validateCondition(condition, cond);
 
     return condition;
@@ -293,27 +284,6 @@ export class RequestQueryParser implements ParsedRequestParams {
   }
 
   private paramParser(name: string): QueryFilter {
-    validateParamOption(this._paramsOptions, name);
-    const option = this._paramsOptions[name];
-
-    if (option.disabled) {
-      return undefined;
-    }
-
-    let value = this._params[name];
-
-    switch (option.type) {
-      case 'number':
-        value = this.parseValue(value);
-        validateNumeric(value, `param ${name}`);
-        break;
-      case 'uuid':
-        validateUUID(value, name);
-        break;
-      default:
-        break;
-    }
-
-    return { field: option.field, operator: '$eq', value };
+    return { field: option.field, operator: CondOperator.EQUALS, value };
   }
 }

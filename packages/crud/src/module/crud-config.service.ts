@@ -5,7 +5,6 @@ import deepmerge from '../util/deepmerge';
 
 export class CrudConfigService {
   static config: CrudGlobalConfig = {
-    auth: {},
     query: {
       alwaysPaginate: false,
     },
@@ -37,15 +36,13 @@ export class CrudConfigService {
       RequestQueryBuilder.setOptions(config.queryParser);
     }
 
-    const auth = isObjectFull(config.auth) ? config.auth : {};
     const query = isObjectFull(config.query) ? config.query : {};
     const routes = isObjectFull(config.routes) ? config.routes : {};
     const params = isObjectFull(config.params) ? config.params : {};
-    const serialize = isObjectFull(config.serialize) ? config.serialize : {};
 
     CrudConfigService.config = deepmerge(
       CrudConfigService.config,
-      { auth, query, routes, params, serialize },
+      { query, routes, params },
       { arrayMerge: (a, b, c) => b },
     );
   }

@@ -17,7 +17,9 @@
     "access": "public"
   },
   "dependencies": {
-    "nest-crud-client": "^4.0.1"
+    "nest-crud-client": "^5.0.0",
+    "proj4": "^2.9.2",
+    "wkx": "^0.5.0"
   },
   "peerDependencies": {
     "@nestjs/common": ">=9.0.0",
@@ -25,6 +27,7 @@
     "class-validator": "*"
   },
   "devDependencies": {
+    "@types/proj4": "^2.5.4",
     "vite-plugin-node": "^3.0.2"
   }
 }

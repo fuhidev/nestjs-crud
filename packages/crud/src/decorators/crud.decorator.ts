@@ -4,6 +4,6 @@ import { CrudOptions } from '../interfaces';
 export const Crud =
   (options: CrudOptions) =>
   (target: unknown): void => {
-    const factoryMethod = options.routesFactory || CrudRoutesFactory;
+    const factoryMethod = CrudRoutesFactory;
     const factory = new factoryMethod(target, options);
   };

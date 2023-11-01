@@ -1,6 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { objKeys } from 'nest-crud-client';
 
+import { DeepPartial } from 'typeorm';
 import { CreateManyDto, CrudRequest, CrudRequestOptions, GetManyDefaultResponse, QueryOptions } from '../interfaces';
 import { ParsedRequestParams } from '../request-parse/parsed-request.interface';
 
@@ -85,13 +86,13 @@ export abstract class CrudService<T> {
 
   abstract getOne(req: CrudRequest): Promise<T>;
 
-  abstract createOne(req: CrudRequest, dto: T | Partial<T>): Promise<T>;
+  abstract createOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T>;
 
   abstract createMany(req: CrudRequest, dto: CreateManyDto): Promise<T[]>;
 
-  abstract updateOne(req: CrudRequest, dto: T | Partial<T>): Promise<T>;
+  abstract updateOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T>;
 
-  abstract replaceOne(req: CrudRequest, dto: T | Partial<T>): Promise<T>;
+  abstract replaceOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T>;
 
   abstract deleteOne(req: CrudRequest): Promise<void | T>;
 

@@ -1,26 +1,15 @@
 import { RequestMethod } from '@nestjs/common';
 import { RouteParamtypes } from '@nestjs/common/enums/route-paramtypes.enum';
 
-import {
-  getOwnPropNames,
-  isArrayFull,
-  isEqual,
-  isFalse,
-  isIn,
-  isNil,
-  isObjectFull,
-  isUndefined,
-  objKeys,
-} from 'nest-crud-client';
-import { CrudActions, CrudValidationGroups } from '../enums';
+import { getOwnPropNames, isArrayFull, isEqual, isIn, isNil, isObjectFull, objKeys } from 'nest-crud-client';
+import { CrudActions } from '../enums';
 import { CrudRequestInterceptor, CrudResponseInterceptor } from '../interceptors';
 import { BaseRoute, CrudOptions, CrudRequest, MergedCrudOptions } from '../interfaces';
 import { CrudConfigService } from '../module';
+import { TypeOrmCrudService } from '../typeorm';
 import { BaseRouteName } from '../types';
 import deepmerge from '../util/deepmerge';
 import { R } from './reflection.helper';
-import { SerializeHelper } from './serialize.helper';
-import { Validation } from './validation.helper';
 
 export class CrudRoutesFactory {
   protected options: MergedCrudOptions;
@@ -42,14 +31,6 @@ export class CrudRoutesFactory {
     return this.target.prototype;
   }
 
-  protected get modelName(): string {
-    return this.options.model.type.name;
-  }
-
-  protected get modelType(): any {
-    return this.options.model.type;
-  }
-
   protected get actionsMap(): { [key in BaseRouteName]: CrudActions } {
     return {
       getManyBase: CrudActions.ReadAll,
@@ -60,6 +41,8 @@ export class CrudRoutesFactory {
       deleteOneBase: CrudActions.DeleteOne,
       replaceOneBase: CrudActions.ReplaceOne,
       recoverOneBase: CrudActions.RecoverOne,
+      getCountBase: CrudActions.ReadCount,
+      getSumBase: CrudActions.ReadSum,
     };
   }
 
@@ -72,19 +55,6 @@ export class CrudRoutesFactory {
   }
 
   protected mergeOptions() {
-    // merge auth config
-    const authOptions = R.getCrudAuthOptions(this.target);
-    this.options.auth = isObjectFull(authOptions) ? authOptions : {};
-    if (isUndefined(this.options.auth.property)) {
-      this.options.auth.property = CrudConfigService.config.auth.property;
-    }
-    if (isUndefined(this.options.auth.groups)) {
-      this.options.auth.groups = CrudConfigService.config.auth.groups;
-    }
-    if (isUndefined(this.options.auth.classTransformOptions)) {
-      this.options.auth.classTransformOptions = CrudConfigService.config.auth.classTransformOptions;
-    }
-
     // merge query config
     const query = isObjectFull(this.options.query) ? this.options.query : {};
     this.options.query = { ...CrudConfigService.config.query, ...query };
@@ -95,58 +65,27 @@ export class CrudRoutesFactory {
       arrayMerge: (a, b, c) => b,
     });
 
-    // set params
-    this.options.params = isObjectFull(this.options.params)
-      ? this.options.params
-      : isObjectFull(CrudConfigService.config.params)
-      ? CrudConfigService.config.params
-      : {};
-    const hasPrimary = this.getPrimaryParams().length > 0;
-    if (!hasPrimary) {
-      this.options.params['id'] = {
-        field: 'id',
-        type: 'number',
-        primary: true,
-      };
-    }
-
-    // set dto
-    if (!isObjectFull(this.options.dto)) {
-      this.options.dto = {};
-    }
-
-    // set serialize
-    const serialize = isObjectFull(this.options.serialize) ? this.options.serialize : {};
-    this.options.serialize = { ...CrudConfigService.config.serialize, ...serialize };
-    this.options.serialize.get = isFalse(this.options.serialize.get)
-      ? false
-      : this.options.serialize.get || this.modelType;
-    this.options.serialize.getMany = isFalse(this.options.serialize.getMany)
-      ? false
-      : this.options.serialize.getMany
-      ? this.options.serialize.getMany
-      : isFalse(this.options.serialize.get)
-      ? /* istanbul ignore next */ false
-      : SerializeHelper.createGetManyDto(this.options.serialize.get, this.modelName);
-    this.options.serialize.create = isFalse(this.options.serialize.create)
-      ? false
-      : this.options.serialize.create || this.modelType;
-    this.options.serialize.update = isFalse(this.options.serialize.update)
-      ? false
-      : this.options.serialize.update || this.modelType;
-    this.options.serialize.replace = isFalse(this.options.serialize.replace)
-      ? false
-      : this.options.serialize.replace || this.modelType;
-    this.options.serialize.delete =
-      isFalse(this.options.serialize.delete) || !this.options.routes.deleteOneBase.returnDeleted
-        ? false
-        : this.options.serialize.delete || this.modelType;
-
     R.setCrudOptions(this.options, this.target);
   }
 
   protected getRoutesSchema(): BaseRoute[] {
     return [
+      {
+        name: 'getCountBase',
+        path: '/count',
+        method: RequestMethod.GET,
+        enable: false,
+        override: false,
+        withParams: false,
+      },
+      {
+        name: 'getSumBase',
+        path: '/sum',
+        method: RequestMethod.GET,
+        enable: false,
+        override: false,
+        withParams: false,
+      },
       {
         name: 'getOneBase',
         path: '/',
@@ -159,6 +98,14 @@ export class CrudRoutesFactory {
         name: 'getManyBase',
         path: '/',
         method: RequestMethod.GET,
+        enable: false,
+        override: false,
+        withParams: false,
+      },
+      {
+        name: 'getManyBase',
+        path: '/',
+        method: RequestMethod.POST,
         enable: false,
         override: false,
         withParams: false,
@@ -255,7 +202,16 @@ export class CrudRoutesFactory {
       return this.service.deleteOne(req);
     };
   }
-
+  protected getCountBase(name: BaseRouteName) {
+    this.targetProto[name] = function (req: CrudRequest) {
+      return (this.service as TypeOrmCrudService).getCount(req);
+    };
+  }
+  protected getSumBase(name: BaseRouteName) {
+    this.targetProto[name] = function (req: CrudRequest) {
+      return (this.service as TypeOrmCrudService).getSum(req);
+    };
+  }
   protected recoverOneBase(name: BaseRouteName) {
     this.targetProto[name] = function recoverOneBase(req: CrudRequest) {
       return this.service.recoverOne(req);
@@ -389,30 +345,14 @@ export class CrudRoutesFactory {
   }
 
   protected setRouteArgs(name: BaseRouteName) {
-    let rest = {};
-    const routes: BaseRouteName[] = ['createManyBase', 'createOneBase', 'updateOneBase', 'replaceOneBase'];
-
-    if (isIn(name, routes)) {
-      const action = this.routeNameAction(name);
-      const hasDto = !isNil(this.options.dto[action]);
-      const { UPDATE, CREATE } = CrudValidationGroups;
-      const groupEnum = isIn(name, ['updateOneBase', 'replaceOneBase']) ? UPDATE : CREATE;
-      const group = !hasDto ? groupEnum : undefined;
-
-      rest = R.setBodyArg(1, [Validation.getValidationPipe(this.options, group)]);
-    }
-
-    R.setRouteArgs({ ...R.setParsedRequestArg(0), ...rest }, this.target, name);
+    R.setRouteArgs({ ...R.setParsedRequestArg(0) }, this.target, name);
   }
 
   protected setRouteArgsTypes(name: BaseRouteName) {
     if (isEqual(name, 'createManyBase')) {
-      const bulkDto = Validation.createBulkDto(this.options);
-      R.setRouteArgsTypes([Object, bulkDto], this.targetProto, name);
+      R.setRouteArgsTypes([Object, Object], this.targetProto, name);
     } else if (isIn(name, ['createOneBase', 'updateOneBase', 'replaceOneBase'])) {
-      const action = this.routeNameAction(name);
-      const dto = this.options.dto[action] || this.modelType;
-      R.setRouteArgsTypes([Object, dto], this.targetProto, name);
+      R.setRouteArgsTypes([Object, Object], this.targetProto, name);
     } else {
       R.setRouteArgsTypes([Object], this.targetProto, name);
     }

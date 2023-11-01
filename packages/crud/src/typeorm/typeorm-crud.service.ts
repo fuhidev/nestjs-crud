@@ -1,6 +1,7 @@
 import { plainToClass } from 'class-transformer';
 import {
   ComparisonOperator,
+  CondOperator,
   QueryFilter,
   QueryJoin,
   QuerySort,
@@ -46,12 +47,15 @@ interface IAllowedRelation {
   allowedColumns: string[];
 }
 
-export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> {
+export class TypeOrmCrudService<T extends ObjectLiteral = any> extends CrudService<T> {
   protected dbName: DataSourceOptions['type'];
 
   protected entityColumns: string[];
 
-  protected entityPrimaryColumns: string[];
+  protected _entityPrimaryColumn: string;
+  public get primaryColumn() {
+    return this._entityPrimaryColumn;
+  }
 
   protected entityHasDeleteColumn = false;
 
@@ -116,7 +120,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
    * @param req
    * @param dto
    */
-  public async createOne(req: CrudRequest, dto: T | Partial<T>): Promise<T> {
+  public async createOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T> {
     const { returnShallow } = req.options.routes.createOneBase;
     const entity = this.prepareEntityBeforeSave(dto, req.parsed);
 
@@ -146,7 +150,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
    * @param req
    * @param dto
    */
-  public async createMany(req: CrudRequest, dto: CreateManyDto<T | Partial<T>>): Promise<T[]> {
+  public async createMany(req: CrudRequest, dto: CreateManyDto<DeepPartial<T>>): Promise<T[]> {
     /* istanbul ignore if */
     if (!isObject(dto) || !isArrayFull(dto.bulk)) {
       this.throwBadRequestException('Empty data. Nothing to save.');
@@ -167,22 +171,18 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
    * @param req
    * @param dto
    */
-  public async updateOne(req: CrudRequest, dto: T | Partial<T>): Promise<T> {
+  public async updateOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T> {
     const { allowParamsOverride, returnShallow } = req.options.routes.updateOneBase;
     const paramsFilters = this.getParamFilters(req.parsed);
     const found = await this.getOneOrFail(req, returnShallow);
-    const toSave = !allowParamsOverride
-      ? { ...found, ...dto, ...paramsFilters, ...req.parsed.authPersist }
-      : { ...found, ...dto, ...req.parsed.authPersist };
-    const updated = await this.repo.save(
-      plainToClass(this.entityType, toSave, req.parsed.classTransformOptions) as unknown as DeepPartial<T>,
-    );
+    const toSave = !allowParamsOverride ? { ...found, ...dto, ...paramsFilters } : { ...found, ...dto };
+    const updated = await this.repo.save(plainToClass(this.entityType, toSave) as unknown as DeepPartial<T>);
 
     if (returnShallow) {
       return updated;
     } else {
       req.parsed.paramsFilter.forEach((filter) => {
-        filter.value = updated[filter.field];
+        filter['value'] = updated[filter.field];
       });
 
       return this.getOneOrFail(req);
@@ -204,21 +204,18 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
    * @param req
    * @param dto
    */
-  public async replaceOne(req: CrudRequest, dto: T | Partial<T>): Promise<T> {
+  public async replaceOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T> {
     const { allowParamsOverride, returnShallow } = req.options.routes.replaceOneBase;
     const paramsFilters = this.getParamFilters(req.parsed);
     const [_, found] = await oO(this.getOneOrFail(req, returnShallow));
     const toSave = !allowParamsOverride
-      ? { ...(found || {}), ...dto, ...paramsFilters, ...req.parsed.authPersist }
+      ? { ...(found || {}), ...dto, ...paramsFilters }
       : {
           ...(found || /* istanbul ignore next */ {}),
           ...paramsFilters,
           ...dto,
-          ...req.parsed.authPersist,
         };
-    const replaced = await this.repo.save(
-      plainToClass(this.entityType, toSave, req.parsed.classTransformOptions) as unknown as DeepPartial<T>,
-    );
+    const replaced = await this.repo.save(plainToClass(this.entityType, toSave) as unknown as DeepPartial<T>);
 
     if (returnShallow) {
       return replaced;
@@ -241,9 +238,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
   public async deleteOne(req: CrudRequest): Promise<void | T> {
     const { returnDeleted } = req.options.routes.deleteOneBase;
     const found = await this.getOneOrFail(req, returnDeleted);
-    const toReturn: T | undefined = returnDeleted
-      ? plainToClass(this.entityType, { ...found }, req.parsed.classTransformOptions)
-      : undefined;
+    const toReturn: T | undefined = returnDeleted ? plainToClass(this.entityType, { ...found }) : undefined;
     req.options.query.softDelete === true
       ? await this.repo.softRemove(found as unknown as DeepPartial<T>)
       : await this.repo.remove(found);
@@ -256,7 +251,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
     /* istanbul ignore else */
     if (hasLength(parsed.paramsFilter)) {
       for (const filter of parsed.paramsFilter) {
-        filters[filter.field] = filter.value;
+        filters[filter.field] = (filter as any).value;
       }
     }
 
@@ -381,9 +376,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
       this.entityColumnsHash[prop.propertyName] = prop.databasePath;
       return prop.propertyName;
     });
-    this.entityPrimaryColumns = this.repo.metadata.columns
-      .filter((prop) => prop.isPrimary)
-      .map((prop) => prop.propertyName);
+    this._entityPrimaryColumn = this.repo.metadata.columns.find((prop) => prop.isPrimary).propertyName;
     this.entityHasDeleteColumn = this.repo.metadata.columns.filter((prop) => prop.isDeleteDate).length > 0;
   }
 
@@ -406,7 +399,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
     return found;
   }
 
-  protected prepareEntityBeforeSave(dto: T | Partial<T>, parsed: CrudRequest['parsed']): T {
+  protected prepareEntityBeforeSave(dto: DeepPartial<T>, parsed: CrudRequest['parsed']): T {
     /* istanbul ignore if */
     if (!isObject(dto)) {
       return undefined;
@@ -414,7 +407,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
 
     if (hasLength(parsed.paramsFilter)) {
       for (const filter of parsed.paramsFilter) {
-        (dto as any)[filter.field] = filter.value;
+        (dto as any)[filter.field] = (filter as any).value;
       }
     }
 
@@ -423,11 +416,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
       return undefined;
     }
 
-    return (
-      dto instanceof this.entityType
-        ? Object.assign(dto, parsed.authPersist)
-        : plainToClass(this.entityType, { ...dto, ...parsed.authPersist }, parsed.classTransformOptions)
-    ) as T;
+    return (dto instanceof this.entityType ? dto : plainToClass(this.entityType, { ...dto })) as T;
   }
 
   protected getAllowedColumns(columns: string[], options: QueryOptions): string[] {
@@ -790,11 +779,9 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
         : allowed;
 
     const select = new Set(
-      [
-        ...(options.persist && options.persist.length ? options.persist : []),
-        ...columns,
-        ...this.entityPrimaryColumns,
-      ].map((col: string) => `${this.alias}.${col}`),
+      [...(options.persist && options.persist.length ? options.persist : []), ...columns, this.primaryColumn].map(
+        (col: string) => `${this.alias}.${col}`,
+      ),
     );
 
     return Array.from(select);
@@ -848,7 +835,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
     let params: ObjectLiteral;
 
     if (cond.operator[0] !== '$') {
-      cond.operator = ('$' + cond.operator) as ComparisonOperator;
+      cond.operator = ('$' + cond.operator) as CondOperator;
     }
 
     switch (cond.operator) {
@@ -971,7 +958,7 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
     }
 
     if (typeof params === 'undefined') {
-      params = { [param]: cond.value };
+      params = { [param]: cond['value'] };
     }
 
     return { str, params };
@@ -979,7 +966,11 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
 
   private checkFilterIsArray(cond: QueryFilter, withLength?: boolean) {
     /* istanbul ignore if */
-    if (!Array.isArray(cond.value) || !cond.value.length || (!isNil(withLength) ? withLength : false)) {
+    if (
+      ((cond as Object).hasOwnProperty('value') && !Array.isArray((cond as any).value)) ||
+      !(cond as any).value.length ||
+      (!isNil(withLength) ? withLength : false)
+    ) {
       this.throwBadRequestException(`Invalid column '${cond.field}' value`);
     }
   }
@@ -996,5 +987,33 @@ export class TypeOrmCrudService<T extends ObjectLiteral> extends CrudService<T> 
     }
 
     return field;
+  }
+
+  async getCountGroup(params: CrudRequest) {
+    const builder = await this.createBuilder(params.parsed, params.options);
+    const count = await builder.getCount();
+    return {
+      count,
+    };
+  }
+  async getCount(req: CrudRequest) {
+    const builder = await this.createBuilder(req.parsed, req.options);
+    const count = await builder.getCount();
+    return {
+      count,
+    };
+  }
+  async getSum(req: CrudRequest) {
+    if (!req.parsed.fields.length) {
+      return {
+        sum: 0,
+      };
+    }
+    const builder = await this.createBuilder(req.parsed, req.options);
+    builder.select(`sum(${req.parsed.fields[0] as string})`, 'sum');
+    const result = await builder.getRawOne();
+    return {
+      sum: result.sum,
+    };
   }
 }

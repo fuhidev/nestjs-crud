@@ -19,7 +19,7 @@ import {
   PARSED_CRUD_REQUEST_KEY,
 } from '../constants';
 import { CrudActions } from '../enums';
-import { AuthOptions, BaseRoute, MergedCrudOptions } from '../interfaces';
+import { BaseRoute, MergedCrudOptions } from '../interfaces';
 import { BaseRouteName } from '../types';
 
 export class R {
@@ -118,10 +118,6 @@ export class R {
 
   static setCrudAuthOptions(metadata: any, target: any) {
     R.set(CRUD_AUTH_OPTIONS_METADATA, metadata, target);
-  }
-
-  static getCrudAuthOptions(target: any): AuthOptions {
-    return R.get(CRUD_AUTH_OPTIONS_METADATA, target);
   }
 
   static getCrudOptions(target: any): MergedCrudOptions {

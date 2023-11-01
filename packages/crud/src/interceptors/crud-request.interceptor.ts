@@ -1,5 +1,4 @@
 import { BadRequestException, CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { ClassTransformOptions } from 'class-transformer';
 import {
   QueryFilter,
   RequestQueryException,
@@ -32,13 +31,23 @@ export class CrudRequestInterceptor extends CrudBaseInterceptor implements NestI
 
         if (!isNil(ctrlOptions)) {
           const search = this.getSearch(parser, crudOptions, action, req.params);
-          const auth = this.getAuth(parser, crudOptions, req);
-          parser.search = auth.or ? { $or: [auth.or, { $and: search }] } : { $and: [auth.filter, ...search] };
+          parser.search = { $and: [...search] };
         } else {
           parser.search = { $and: this.getSearch(parser, crudOptions, action) };
         }
 
         req[PARSED_CRUD_REQUEST_KEY] = this.getCrudRequest(parser, crudOptions);
+      }
+      const value = req[PARSED_CRUD_REQUEST_KEY];
+      if (value) {
+        try {
+          value.parsed.bbox = req.query.bbox ? JSON.parse(req.query.bbox) : null;
+        } catch (error) {
+          value.parsed.bbox = null;
+        }
+        value.parsed.outSR = +req.query.outSR;
+        value.parsed.inSR = +req.query.inSR;
+        value.parsed.filterGeo = req.body.filterGeo || null;
       }
 
       return next.handle();
@@ -131,38 +140,5 @@ export class CrudRequestInterceptor extends CrudBaseInterceptor implements NestI
     }
 
     return [];
-  }
-
-  getAuth(parser: RequestQueryParser, crudOptions: Partial<MergedCrudOptions>, req: any): { filter?: any; or?: any } {
-    const auth: any = {};
-
-    /* istanbul ignore else */
-    if (crudOptions.auth) {
-      const userOrRequest = crudOptions.auth.property ? req[crudOptions.auth.property] : req;
-
-      if (isFunction(crudOptions.auth.or)) {
-        auth.or = crudOptions.auth.or(userOrRequest);
-      }
-
-      if (isFunction(crudOptions.auth.filter) && !auth.or) {
-        auth.filter = crudOptions.auth.filter(userOrRequest) || /* istanbul ignore next */ {};
-      }
-
-      if (isFunction(crudOptions.auth.persist)) {
-        parser.setAuthPersist(crudOptions.auth.persist(userOrRequest));
-      }
-
-      const options: ClassTransformOptions = {};
-      if (isFunction(crudOptions.auth.classTransformOptions)) {
-        Object.assign(options, crudOptions.auth.classTransformOptions(userOrRequest));
-      }
-
-      if (isFunction(crudOptions.auth.groups)) {
-        options.groups = crudOptions.auth.groups(userOrRequest);
-      }
-      parser.setClassTransformOptions(options);
-    }
-
-    return auth;
   }
 }
