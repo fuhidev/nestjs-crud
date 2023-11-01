@@ -128,6 +128,7 @@ export class RequestQueryParser implements ParsedRequestParams {
       if (hasLength(paramNames)) {
         this._params = params;
         this._paramsOptions = options;
+        this.paramsFilter = paramNames.map((name) => this.paramParser(name)).filter((filter) => filter);
       }
     }
 
@@ -284,6 +285,7 @@ export class RequestQueryParser implements ParsedRequestParams {
   }
 
   private paramParser(name: string): QueryFilter {
-    return { field: option.field, operator: CondOperator.EQUALS, value };
+    let value = this._params[name];
+    return { field: this._paramsOptions.primaryKey, operator: CondOperator.EQUALS, value };
   }
 }

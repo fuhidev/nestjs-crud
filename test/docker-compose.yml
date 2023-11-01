@@ -1,0 +1,14 @@
+version: '3'
+
+networks:
+  nestjsx_crud:
+
+services:
+  postgres:
+    # TypeORM fails with Postgres v.12
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    container_name: mssql2017
+    ports:
+      - 1433:1433
+    environment:
+      MSSQL_SA_PASSWORD: 123456

@@ -12,7 +12,15 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: ['nest-crud-client', 'class-transformer', 'class-validator', '@nestjs/common'],
+      external: [
+        'nest-crud-client',
+        'class-transformer',
+        'class-validator',
+        '@nestjs/common',
+        'typeorm',
+        'wkx',
+        'proj4',
+      ],
     },
   },
   plugins: [

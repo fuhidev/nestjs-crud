@@ -6,6 +6,5 @@ export * from './crud-options.interface';
 export * from './crud-request.interface';
 export * from './dto-options.interface';
 export * from './get-many-default-response.interface';
-export * from './model-options.interface';
 export * from './query-options.interface';
 export * from './routes-options.interface';

@@ -2,23 +2,7 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nes
 import { ClassTransformOptions, classToPlain, classToPlainFromExist } from 'class-transformer';
 import { isFalse, isFunction, isObject } from 'nest-crud-client';
 import { Observable } from 'rxjs';
-import { CrudActions } from '../enums';
-import { SerializeOptions } from '../interfaces';
 import { CrudBaseInterceptor } from './crud-base.interceptor';
-
-const actionToDtoNameMap: {
-  [key in CrudActions]: keyof SerializeOptions;
-} = {
-  [CrudActions.ReadAll]: 'getMany',
-  [CrudActions.ReadOne]: 'get',
-  [CrudActions.CreateMany]: 'createMany',
-  [CrudActions.CreateOne]: 'create',
-  [CrudActions.UpdateOne]: 'update',
-  [CrudActions.ReplaceOne]: 'replace',
-  [CrudActions.DeleteAll]: 'delete',
-  [CrudActions.DeleteOne]: 'delete',
-  [CrudActions.RecoverOne]: 'recover',
-};
 
 @Injectable()
 export class CrudResponseInterceptor extends CrudBaseInterceptor implements NestInterceptor {

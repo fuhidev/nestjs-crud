@@ -24,7 +24,8 @@
   "peerDependencies": {
     "@nestjs/common": ">=9.0.0",
     "class-transformer": "*",
-    "class-validator": "*"
+    "class-validator": "*",
+    "typeorm": ">=0.3.0"
   },
   "devDependencies": {
     "@types/proj4": "^2.5.4",
