@@ -613,7 +613,7 @@ export class TypeOrmCrudService<
     ? cond.select.filter((column) =>
        allowedRelation.allowedColumns.some((allowed) => allowed === column)
       )
-    : allowedRelation.allowedColumns;
+    : [];
 
    const select = new Set(
     [

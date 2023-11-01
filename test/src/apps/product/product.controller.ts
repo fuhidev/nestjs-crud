@@ -6,9 +6,6 @@ import { ProductService } from './product.service';
   params: {
     primaryKey: 'productId',
   },
-  routes: {
-    only: ['getOneBase', 'updateOneBase', 'deleteOneBase'],
-  },
   query: {
     maxLimit: 20,
     join: {

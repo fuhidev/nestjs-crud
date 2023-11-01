@@ -1,3 +1,4 @@
+import { GeoJSON } from 'nest-crud-client';
 import {
   Column,
   CreateDateColumn,
@@ -7,6 +8,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { GeometryColumn } from '../../../../packages/crud/dist';
 import { AgencyEntity } from '../agency/agency.entity';
 import { DistrictEntity } from '../district/district.entity';
 
@@ -53,4 +55,7 @@ export class ProductEntity {
   @ManyToOne(() => DistrictEntity, { onDelete: 'SET NULL' })
   district: DistrictEntity;
   @Column({ nullable: true }) location: string;
+
+  @GeometryColumn({ nullable: true })
+  shape: GeoJSON.Point;
 }

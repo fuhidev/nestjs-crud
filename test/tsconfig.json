@@ -18,7 +18,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "nest-crud-server": ["../packages/crud"]
+      "nest-crud-server": ["../packages/crud"],
+      "nest-crud-client": ["../packages/nest-crud-client"]
     }
   }
 }
