@@ -11,4 +11,5 @@ services:
     ports:
       - 1433:1433
     environment:
-      MSSQL_SA_PASSWORD: 123456
+      MSSQL_SA_PASSWORD: yourStrong(!)Password
+      ACCEPT_EULA: Y
