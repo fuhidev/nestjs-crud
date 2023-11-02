@@ -1,1 +1,2 @@
-export * from './typeorm-crud.service';
+export * from "./typeorm-crud.interface";
+export * from "./typeorm-crud.service";
