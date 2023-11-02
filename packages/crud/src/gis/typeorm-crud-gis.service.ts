@@ -1,19 +1,14 @@
 import { BadRequestException } from "@nestjs/common";
 import { Envelope, QueryFilterGeo, SpatialMethodEnum } from "nest-crud-client";
-import {
- DeepPartial,
- ObjectLiteral,
- Repository,
- SelectQueryBuilder,
-} from "typeorm";
+import { DeepPartial, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
+import { CrudRequest, GetManyDefaultResponse } from "../interfaces";
 import {
- CreateManyDto,
- CrudRequest,
- CrudRequestOptions,
- GetManyDefaultResponse,
-} from "../interfaces";
-import { ParsedRequestParams } from "../request-parse";
+ CreateBuilderParam,
+ CreateManyParam,
+ CreateOneParam,
+ DoGetManyParam,
+} from "../typeorm/typeorm-crud.interface";
 import { TypeOrmCrudService } from "../typeorm/typeorm-crud.service";
 import {
  ProjGeometryConvertor,
@@ -30,11 +25,10 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
   super(repo);
  }
  public async createBuilder(
-  parsed: ParsedRequestParams,
-  options: CrudRequestOptions,
-  opts?: { many: boolean; withDeleted: boolean } & ObjectLiteral
+  params: CreateBuilderParam
  ): Promise<SelectQueryBuilder<T>> {
-  const builder = await super.createBuilder(parsed, options, opts);
+  const { parsed } = params;
+  const builder = await super.createBuilder(params);
   if (parsed.filterGeo && parsed.filterGeo.geometry) {
    await this.setAndWhereFilterGeo(builder, parsed.filterGeo);
   }
@@ -97,23 +91,12 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
   return builder;
  }
 
- /**
-  * depends on paging call `SelectQueryBuilder#getMany` or `SelectQueryBuilder#getManyAndCount`
-  * helpful for overriding `TypeOrmCrudService#getMany`
-  * @see getMany
-  * @see SelectQueryBuilder#getMany
-  * @see SelectQueryBuilder#getManyAndCount
-  * @param builder
-  * @param query
-  * @param options
-  */
  protected async doGetMany(
-  builder: SelectQueryBuilder<T>,
-  query: ParsedRequestParams,
-  options: CrudRequestOptions
- ): Promise<GetManyDefaultResponse<T> | T[]> {
-  const isPagi = this.decidePagination(query, options);
-  const result = await super.doGetMany(builder, query, options);
+  params: DoGetManyParam<T>
+ ): Promise<T[] | GetManyDefaultResponse<T>> {
+  const { parsed, options } = params;
+  const isPagi = this.decidePagination(params.parsed, params.options);
+  const result = await super.doGetMany(params);
   let data: T[] = [];
   if (isPagi) {
    data = (result as any).data;
@@ -122,10 +105,10 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
   }
   // nếu dữ liệu có trường kiểu geometry
   if (
-   query.fields.length === 0 ||
-   query.fields.indexOf(this.getGeometryColumn().propertyName) > -1
+   parsed.fields.length === 0 ||
+   parsed.fields.indexOf(this.getGeometryColumn().propertyName) > -1
   )
-   this.convertVn2000ToOutSR(data, query.outSR);
+   this.convertVn2000ToOutSR(data, parsed.outSR);
   return result;
  }
 
@@ -176,10 +159,11 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
   return result;
  }
 
- async createOne(req: CrudRequest, dto: DeepPartial<T>) {
-  this.convertInSRToVn2000(dto, req.parsed.inSR);
+ public async createOne(params: CreateOneParam<T>): Promise<T> {
+  const { dto, parsed } = params;
+  this.convertInSRToVn2000(dto, parsed.inSR);
 
-  let entity = this.prepareEntityBeforeSave(dto, req.parsed);
+  let entity = this.prepareEntityBeforeSave({ ...params });
   if (!entity) {
    this.throwBadRequestException(`Empty data. Nothing to save.`);
   }
@@ -219,8 +203,8 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
    }
   }
 
-  const result = await super.createOne(req, dto);
-  this.convertVn2000ToOutSR(result, req.parsed.outSR);
+  const result = await super.createOne(params);
+  this.convertVn2000ToOutSR(result, parsed.outSR);
   return result;
  }
  private isEsriClass(primaryCol: ColumnMetadata) {
@@ -279,14 +263,15 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
   return primaryCol;
  }
 
- async createMany(req: CrudRequest, dto: CreateManyDto<DeepPartial<T>>) {
+ public async createMany(params: CreateManyParam<T>) {
+  const { dto, parsed, options } = params;
   /* istanbul ignore if */
   if (typeof dto !== "object" || !Array.isArray(dto.bulk)) {
    this.throwBadRequestException(`Empty data. Nothing to save.`);
   }
 
   const bulk = dto.bulk
-   .map((one) => this.prepareEntityBeforeSave(one, req.parsed))
+   .map((one) => this.prepareEntityBeforeSave({ ...params, dto: one }))
    .filter((d) => d !== undefined) as DeepPartial<T>[];
 
   /* istanbul ignore if */
@@ -294,7 +279,7 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
    this.throwBadRequestException(`Empty data. Nothing to save.`);
   }
 
-  this.convertInSRToVn2000(bulk, req.parsed.inSR);
+  this.convertInSRToVn2000(bulk, parsed.inSR);
   const primaryCol = await this.getPrimaryCol();
   if (this.isEsriClass(primaryCol)) {
    const promises = [];
@@ -307,16 +292,16 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
    await Promise.all(promises);
   }
 
-  const result = await super.createMany(req, { bulk });
+  const result = await super.createMany(params);
 
-  this.convertVn2000ToOutSR(result, req.parsed.outSR);
+  this.convertVn2000ToOutSR(result, parsed.outSR);
   return result;
  }
 
- async updateOne(req: CrudRequest, dto: DeepPartial<T>) {
-  this.convertInSRToVn2000(dto, req.parsed.inSR);
-  const result = await super.updateOne(req, dto);
-  this.convertVn2000ToOutSR(result, req.parsed.outSR);
+ public async updateOne(params: CreateOneParam<T>): Promise<T> {
+  this.convertInSRToVn2000(params.dto, params.parsed.inSR);
+  const result = await super.updateOne(params);
+  this.convertVn2000ToOutSR(result, params.parsed.outSR);
   return result;
  }
 

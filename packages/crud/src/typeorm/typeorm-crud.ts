@@ -22,11 +22,13 @@ import {
  Repository,
  SelectQueryBuilder,
 } from "typeorm";
-import { CrudRequest } from "../interfaces/crud-request.interface";
-import { GetManyDefaultResponse } from "../interfaces/get-many-default-response.interface";
-import { QueryOptions } from "../interfaces/query-options.interface";
-import { ClassType } from "../request-parse/class.type";
-import { ParsedRequestParams } from "../request-parse/parsed-request.interface";
+import {
+ CrudRequest,
+ CrudRequestOptions,
+ GetManyDefaultResponse,
+ QueryOptions,
+} from "../interfaces";
+import { ClassType, ParsedRequestParams } from "../request-parse";
 import { CrudService } from "../services";
 import { oO } from "../util/oO";
 import {
@@ -43,12 +45,26 @@ import {
  RecoverOneParam,
  SetAndWhereParam,
  SetJoinParam,
+ TypeOrmCrudConstructor,
  TypeormDefaultParam,
 } from "./typeorm-crud.interface";
+const sqlInjectionRegEx: RegExp[] = [
+ /(%27)|(\')|(--)|(%23)|(#)/gi,
+ /((%3D)|(=))[^\n]*((%27)|(\')|(--)|(%3B)|(;))/gi,
+ /w*((%27)|(\'))((%6F)|o|(%4F))((%72)|r|(%52))/gi,
+ /((%27)|(\'))union/gi,
+];
+export class TypeormCrud<T = any> extends CrudService<T> {
+ protected options: CrudRequestOptions;
+ protected parsed: ParsedRequestParams;
+ protected repo: Repository<T>;
+ constructor(cons: TypeOrmCrudConstructor<T>) {
+  super();
+  this.options = cons.options;
+  this.parsed = cons.parsed;
+  this.repo = cons.repo;
+ }
 
-export abstract class TypeOrmCrudService<
- T extends ObjectLiteral = any
-> extends CrudService<T> {
  protected dbName: string;
 
  protected entityColumns: string[];
@@ -63,20 +79,6 @@ export abstract class TypeOrmCrudService<
  protected entityColumnsHash: ObjectLiteral = {};
 
  protected entityRelationsHash: Map<string, IAllowedRelation> = new Map();
-
- protected sqlInjectionRegEx: RegExp[] = [
-  /(%27)|(\')|(--)|(%23)|(#)/gi,
-  /((%3D)|(=))[^\n]*((%27)|(\')|(--)|(%3B)|(;))/gi,
-  /w*((%27)|(\'))((%6F)|o|(%4F))((%72)|r|(%52))/gi,
-  /((%27)|(\'))union/gi,
- ];
-
- constructor(protected repo: Repository<T>) {
-  super();
-
-  this.dbName = this.repo.metadata.connection.options.type;
-  // this.onInitMapEntityColumns();
- }
 
  public get findOne(): Repository<T>["findOne"] {
   return this.repo.findOne.bind(this.repo);
@@ -122,7 +124,9 @@ export abstract class TypeOrmCrudService<
   * @param req
   * @param dto
   */
- public async createOne(params: CreateOneParam<T>): Promise<T> {
+ public async createOne(
+  params: TypeormDefaultParam & { dto: DeepPartial<T> }
+ ): Promise<T> {
   const { returnShallow } = params.options.routes.createOneBase;
   const entity = this.prepareEntityBeforeSave({
    ...params,
@@ -1092,10 +1096,10 @@ export abstract class TypeOrmCrudService<
 
  private checkSqlInjection(field: string): string {
   /* istanbul ignore else */
-  if (this.sqlInjectionRegEx.length) {
-   for (let i = 0; i < this.sqlInjectionRegEx.length; i++) {
+  if (sqlInjectionRegEx.length) {
+   for (let i = 0; i < sqlInjectionRegEx.length; i++) {
     /* istanbul ignore else */
-    if (this.sqlInjectionRegEx[0].test(field)) {
+    if (sqlInjectionRegEx[0].test(field)) {
      this.throwBadRequestException(`SQL injection detected: "${field}"`);
     }
    }

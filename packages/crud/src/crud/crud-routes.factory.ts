@@ -29,10 +29,7 @@ import { R } from "./reflection.helper";
 export class CrudRoutesFactory {
  protected options: MergedCrudOptions;
 
- constructor(
-  protected target: any,
-  options: CrudOptions
- ) {
+ constructor(protected target: any, options: CrudOptions) {
   this.options = options;
   this.create();
  }
@@ -196,25 +193,25 @@ export class CrudRoutesFactory {
 
  protected createOneBase(name: BaseRouteName) {
   this.targetProto[name] = function (req: CrudRequest, dto: any) {
-   return this.service.createOne(req, dto);
+   return this.service.createOne({ ...req, dto });
   };
  }
 
  protected createManyBase(name: BaseRouteName) {
   this.targetProto[name] = function (req: CrudRequest, dto: any) {
-   return this.service.createMany(req, dto);
+   return this.service.createMany({ ...req, dto });
   };
  }
 
  protected updateOneBase(name: BaseRouteName) {
   this.targetProto[name] = function (req: CrudRequest, dto: any) {
-   return this.service.updateOne(req, dto);
+   return this.service.updateOne({ ...req, dto });
   };
  }
 
  protected replaceOneBase(name: BaseRouteName) {
   this.targetProto[name] = function (req: CrudRequest, dto: any) {
-   return this.service.replaceOne(req, dto);
+   return this.service.replaceOne({ ...req, dto });
   };
  }
 
