@@ -808,8 +808,11 @@ export abstract class TypeOrmCrudService<
    },
    i: index,
   };
-  const fn = condition === "$and" ? this.setAndWhere : this.setOrWhere;
-  fn.apply(this, args);
+  if (condition === "$and") {
+   this.setAndWhere(args);
+  } else {
+   this.setOrWhere(args);
+  }
  }
 
  protected setSearchFieldObjectCondition(
