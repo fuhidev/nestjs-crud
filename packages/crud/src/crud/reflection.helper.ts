@@ -13,6 +13,7 @@ import {
  ACTION_NAME_METADATA,
  CRUD_AUTH_OPTIONS_METADATA,
  CRUD_OPTIONS_METADATA,
+ CUSTOM_ROUTE_ARGS_METADATA,
  OVERRIDE_METHOD_METADATA,
  PARSED_BODY_METADATA,
  PARSED_CRUD_REQUEST_KEY,
@@ -53,7 +54,7 @@ export class R {
   data = undefined
  ): any {
   return {
-   [`${paramtype}${ROUTE_ARGS_METADATA}:${index}`]: {
+   [`${paramtype}${CUSTOM_ROUTE_ARGS_METADATA}:${index}`]: {
     index,
     factory: (_, ctx) => R.getContextRequest(ctx)[paramtype],
     data,

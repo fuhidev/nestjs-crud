@@ -1,6 +1,5 @@
 import { plainToClass } from "class-transformer";
 import {
- ComparisonOperator,
  CondOperator,
  QueryFilter,
  QuerySort,
@@ -75,7 +74,7 @@ export abstract class TypeOrmCrudService<
   super();
 
   this.dbName = this.repo.metadata.connection.options.type;
-  // this.onInitMapEntityColumns();
+  this.onInitMapEntityColumns();
  }
 
  public get findOne(): Repository<T>["findOne"] {
@@ -796,15 +795,19 @@ export abstract class TypeOrmCrudService<
   condition: SConditionKey,
   field: string,
   value: any,
-  operator: ComparisonOperator = "$eq"
+  operator: CondOperator = CondOperator.EQUALS
  ) {
   const time = process.hrtime();
   const index = `${field}${time[0]}${time[1]}`;
-  const args = [
-   { field, operator: isNull(value) ? "$isnull" : operator, value },
-   index,
+  const args: SetAndWhereParam<T> = {
    builder,
-  ];
+   cond: {
+    field,
+    operator: isNull(value) ? CondOperator.IS_NULL : operator,
+    value,
+   },
+   i: index,
+  };
   const fn = condition === "$and" ? this.setAndWhere : this.setOrWhere;
   fn.apply(this, args);
  }
@@ -820,7 +823,7 @@ export abstract class TypeOrmCrudService<
    const operators = objKeys(object);
 
    if (operators.length === 1) {
-    const operator = operators[0] as ComparisonOperator;
+    const operator = operators[0] as CondOperator;
     const value = object[operator];
 
     if (isObject(object.$or)) {
@@ -841,26 +844,26 @@ export abstract class TypeOrmCrudService<
       builder,
       condition,
       new Brackets((qb: any) => {
-       operators.forEach((operator: ComparisonOperator) => {
+       operators.forEach((operator: CondOperator) => {
         const value = object[operator];
 
-        if (operator !== "$or") {
-         this.builderSetWhere(qb, condition, field, value, operator);
-        } else {
-         const orKeys = objKeys(object.$or);
+        // if (operator !== "$or") {
+        this.builderSetWhere(qb, condition, field, value, operator);
+        // } else {
+        //  const orKeys = objKeys(object.$or);
 
-         if (orKeys.length === 1) {
-          this.setSearchFieldObjectCondition(qb, condition, field, object.$or);
-         } else {
-          this.builderAddBrackets(
-           qb,
-           condition,
-           new Brackets((qb2: any) => {
-            this.setSearchFieldObjectCondition(qb2, "$or", field, object.$or);
-           })
-          );
-         }
-        }
+        //  if (orKeys.length === 1) {
+        //   this.setSearchFieldObjectCondition(qb, condition, field, object.$or);
+        //  } else {
+        //   this.builderAddBrackets(
+        //    qb,
+        //    condition,
+        //    new Brackets((qb2: any) => {
+        //     this.setSearchFieldObjectCondition(qb2, "$or", field, object.$or);
+        //    })
+        //   );
+        //  }
+        // }
        });
       })
      );
