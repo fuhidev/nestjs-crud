@@ -17,21 +17,20 @@ import {
 } from "nest-crud-client";
 import {
  Brackets,
- DataSourceOptions,
  DeepPartial,
  EntityMetadata,
  ObjectLiteral,
  Repository,
  SelectQueryBuilder,
 } from "typeorm";
+import { CreateManyDto } from "../interfaces/create-many-dto.interface";
+import { CrudRequestOptions } from "../interfaces/crud-options.interface";
+import { CrudRequest } from "../interfaces/crud-request.interface";
+import { GetManyDefaultResponse } from "../interfaces/get-many-default-response.interface";
 import {
- CreateManyDto,
- CrudRequest,
- CrudRequestOptions,
- GetManyDefaultResponse,
  JoinOption,
  QueryOptions,
-} from "../interfaces";
+} from "../interfaces/query-options.interface";
 import { ClassType } from "../request-parse/class.type";
 import { ParsedRequestParams } from "../request-parse/parsed-request.interface";
 import { CrudService } from "../services";
@@ -47,10 +46,10 @@ interface IAllowedRelation {
  allowedColumns: string[];
 }
 
-export class TypeOrmCrudService<
- T extends ObjectLiteral = any,
+export abstract class TypeOrmCrudService<
+ T extends ObjectLiteral = any
 > extends CrudService<T> {
- protected dbName: DataSourceOptions["type"];
+ protected dbName: string;
 
  protected entityColumns: string[];
 
@@ -76,7 +75,7 @@ export class TypeOrmCrudService<
   super();
 
   this.dbName = this.repo.metadata.connection.options.type;
-  this.onInitMapEntityColumns();
+  // this.onInitMapEntityColumns();
  }
 
  public get findOne(): Repository<T>["findOne"] {
@@ -104,10 +103,11 @@ export class TypeOrmCrudService<
   * @param req
   */
  public async getMany(
-  req: CrudRequest
+  req: CrudRequest,
+  opts?: any
  ): Promise<GetManyDefaultResponse<T> | T[]> {
   const { parsed, options } = req;
-  const builder = await this.createBuilder(parsed, options);
+  const builder = await this.createBuilderGetMany(parsed, options, opts);
   return this.doGetMany(builder, parsed, options);
  }
 
@@ -115,7 +115,7 @@ export class TypeOrmCrudService<
   * Get one
   * @param req
   */
- public async getOne(req: CrudRequest): Promise<T> {
+ public async getOne(req: CrudRequest, opts?: any): Promise<T> {
   return this.getOneOrFail(req);
  }
 
@@ -124,7 +124,11 @@ export class TypeOrmCrudService<
   * @param req
   * @param dto
   */
- public async createOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T> {
+ public async createOne(
+  req: CrudRequest,
+  dto: DeepPartial<T>,
+  opts?: any
+ ): Promise<T> {
   const { returnShallow } = req.options.routes.createOneBase;
   const entity = this.prepareEntityBeforeSave(dto, req.parsed);
 
@@ -156,7 +160,8 @@ export class TypeOrmCrudService<
   */
  public async createMany(
   req: CrudRequest,
-  dto: CreateManyDto<DeepPartial<T>>
+  dto: CreateManyDto<DeepPartial<T>>,
+  opts?: any
  ): Promise<T[]> {
   /* istanbul ignore if */
   if (!isObject(dto) || !isArrayFull(dto.bulk)) {
@@ -180,9 +185,13 @@ export class TypeOrmCrudService<
   * @param req
   * @param dto
   */
- public async updateOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T> {
+ public async updateOne(
+  req: CrudRequest,
+  dto: DeepPartial<T>,
+  opts?: any
+ ): Promise<T> {
   const { returnShallow } = req.options.routes.updateOneBase;
-  const found = await this.getOneOrFail(req, returnShallow);
+  const found = await this.getOneOrFail(req, { shallow: returnShallow });
   const toSave = { ...found, ...dto };
   const updated = await this.repo.save(
    plainToClass(this.entityType, toSave) as unknown as DeepPartial<T>
@@ -204,8 +213,11 @@ export class TypeOrmCrudService<
   * @param req
   * @param dto
   */
- public async recoverOne(req: CrudRequest): Promise<T> {
-  const found = await this.getOneOrFail(req, false, true);
+ public async recoverOne(req: CrudRequest, opts?: any): Promise<T> {
+  const found = await this.getOneOrFail(req, {
+   shallow: false,
+   withDeleted: true,
+  });
   return this.repo.recover(found as unknown as DeepPartial<T>);
  }
 
@@ -214,10 +226,16 @@ export class TypeOrmCrudService<
   * @param req
   * @param dto
   */
- public async replaceOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T> {
+ public async replaceOne(
+  req: CrudRequest,
+  dto: DeepPartial<T>,
+  opts?: any
+ ): Promise<T> {
   const { returnShallow } = req.options.routes.replaceOneBase;
   const paramsFilters = this.getParamFilters(req.parsed);
-  const [_, found] = await oO(this.getOneOrFail(req, returnShallow));
+  const [_, found] = await oO(
+   this.getOneOrFail(req, { shallow: returnShallow })
+  );
   const toSave = {
    ...(found || /* istanbul ignore next */ {}),
    ...paramsFilters,
@@ -245,9 +263,9 @@ export class TypeOrmCrudService<
   * Delete one
   * @param req
   */
- public async deleteOne(req: CrudRequest): Promise<void | T> {
+ public async deleteOne(req: CrudRequest, opts?: any): Promise<void | T> {
   const { returnDeleted } = req.options.routes.deleteOneBase;
-  const found = await this.getOneOrFail(req, returnDeleted);
+  const found = await this.getOneOrFail(req, { shallow: returnDeleted });
   const toReturn: T | undefined = returnDeleted
    ? plainToClass(this.entityType, { ...found })
    : undefined;
@@ -279,9 +297,14 @@ export class TypeOrmCrudService<
  public async createBuilder(
   parsed: ParsedRequestParams,
   options: CrudRequestOptions,
-  many = true,
-  withDeleted = false
+  opts: {
+   many?: boolean;
+   withDeleted?: boolean;
+  } & ObjectLiteral = {}
  ): Promise<SelectQueryBuilder<T>> {
+  let { many, withDeleted } = opts;
+  many = many ?? true;
+  withDeleted = withDeleted ?? false;
   // create query builder
   const builder = this.repo.createQueryBuilder(this.alias);
   // get select fields
@@ -352,6 +375,14 @@ export class TypeOrmCrudService<
   return builder;
  }
 
+ protected async createBuilderGetMany(
+  parsed: ParsedRequestParams,
+  options: CrudRequestOptions,
+  opts?: any
+ ) {
+  return this.createBuilder(parsed, options);
+ }
+
  /**
   * depends on paging call `SelectQueryBuilder#getMany` or `SelectQueryBuilder#getManyAndCount`
   * helpful for overriding `TypeOrmCrudService#getMany`
@@ -365,7 +396,8 @@ export class TypeOrmCrudService<
  protected async doGetMany(
   builder: SelectQueryBuilder<T>,
   query: ParsedRequestParams,
-  options: CrudRequestOptions
+  options: CrudRequestOptions,
+  opts?: any
  ): Promise<GetManyDefaultResponse<T> | T[]> {
   if (this.decidePagination(query, options)) {
    const [data, total] = await builder.getManyAndCount();
@@ -397,13 +429,15 @@ export class TypeOrmCrudService<
 
  protected async getOneOrFail(
   req: CrudRequest,
-  shallow = false,
-  withDeleted = false
+  opts: { shallow?: boolean; withDeleted?: boolean } = {}
  ): Promise<T> {
+  let { shallow, withDeleted } = opts;
+  shallow = shallow ?? false;
+  withDeleted = withDeleted ?? false;
   const { parsed, options } = req;
   const builder = shallow
    ? this.repo.createQueryBuilder(this.alias)
-   : await this.createBuilder(parsed, options, true, withDeleted);
+   : await this.createBuilder(parsed, options, { many: true, withDeleted });
 
   if (shallow) {
    this.setSearchCondition(builder, parsed.search);

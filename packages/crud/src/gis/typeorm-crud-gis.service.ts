@@ -1,6 +1,11 @@
 import { BadRequestException } from "@nestjs/common";
 import { Envelope, QueryFilterGeo, SpatialMethodEnum } from "nest-crud-client";
-import { DeepPartial, Repository, SelectQueryBuilder } from "typeorm";
+import {
+ DeepPartial,
+ ObjectLiteral,
+ Repository,
+ SelectQueryBuilder,
+} from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import {
  CreateManyDto,
@@ -24,20 +29,12 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
  constructor(repo: Repository<T>) {
   super(repo);
  }
-
- /**
-  * Create TypeOrm QueryBuilder
-  * @param parsed
-  * @param options
-  * @param many
-  */
  public async createBuilder(
   parsed: ParsedRequestParams,
   options: CrudRequestOptions,
-  many = true
+  opts?: { many: boolean; withDeleted: boolean } & ObjectLiteral
  ): Promise<SelectQueryBuilder<T>> {
-  // create query builder
-  const builder = await super.createBuilder(parsed, options, many);
+  const builder = await super.createBuilder(parsed, options, opts);
   if (parsed.filterGeo && parsed.filterGeo.geometry) {
    await this.setAndWhereFilterGeo(builder, parsed.filterGeo);
   }
@@ -329,18 +326,6 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
     this.repo.metadata.connection.driver.spatialTypes.indexOf(column.type) !==
     -1
   );
- }
-
- async executeSql(params: { query: string }) {
-  if (!params.query.length) {
-   throw new BadRequestException("Không xác định được lệnh");
-  }
-  try {
-   const query = `UPDATE ${this.repo.metadata.tableName} ${params.query}`;
-   await this.repo.query(query);
-  } catch (error) {
-   throw new BadRequestException(error.driverError.originalError.message);
-  }
  }
 
  equalSrs(srs1?: number, srs2: number = gisModuleOption.centralMeridian) {

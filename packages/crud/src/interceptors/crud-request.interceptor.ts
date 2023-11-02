@@ -46,7 +46,11 @@ export class CrudRequestInterceptor
      parser.search = { $and: this.getSearch(parser, crudOptions, action) };
     }
 
-    req[PARSED_CRUD_REQUEST_KEY] = this.getCrudRequest(parser, crudOptions);
+    req[PARSED_CRUD_REQUEST_KEY] = this.getCrudRequest(
+     req,
+     parser,
+     crudOptions
+    );
    }
    const value = req[PARSED_CRUD_REQUEST_KEY];
    if (value) {
@@ -70,6 +74,7 @@ export class CrudRequestInterceptor
  }
 
  getCrudRequest(
+  req,
   parser: RequestQueryParser,
   crudOptions: Partial<MergedCrudOptions>
  ): CrudRequest {
@@ -77,6 +82,7 @@ export class CrudRequestInterceptor
   const { query, routes, params } = crudOptions;
 
   return {
+   req,
    parsed,
    options: {
     query,
