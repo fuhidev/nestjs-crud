@@ -36,6 +36,7 @@ import {
  DoGetManyParam,
  GetAllowedColumnsParam,
  GetOneOrFailParam,
+ GetPrimaryKeyFromReqParams,
  GetRelationMetadataParam,
  IAllowedRelation,
  PrepareEntityBeforeSaveParam,
@@ -417,6 +418,10 @@ export abstract class TypeOrmCrudService<
   ).propertyName;
   this.entityHasDeleteColumn =
    this.repo.metadata.columns.filter((prop) => prop.isDeleteDate).length > 0;
+ }
+
+ protected getPrimaryKeyFromReq(params: GetPrimaryKeyFromReqParams) {
+  return params.req.params[this.getPrimaryKey(params.options)];
  }
 
  protected async getOneOrFail(params: GetOneOrFailParam): Promise<T> {

@@ -65,3 +65,5 @@ export interface IAllowedRelation {
  primaryColumns: string[];
  allowedColumns: string[];
 }
+
+export type GetPrimaryKeyFromReqParams = TypeormDefaultParam;
