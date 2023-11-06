@@ -211,7 +211,7 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
   return primaryCol.databaseName === "OBJECTID" && !primaryCol.isGenerated;
  }
 
- private async generateEsriObjectId() {
+ public async generateEsriObjectId() {
   try {
    const result: Array<{ objectId: number }> = await this.repo.query(`
       DECLARE @owner varchar(10)
