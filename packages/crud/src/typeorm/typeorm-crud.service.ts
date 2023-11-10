@@ -139,12 +139,13 @@ export abstract class TypeOrmCrudService<
   if (returnShallow) {
    return saved;
   } else {
-   const primaryParams = this.getPrimaryKey(params.options);
+   const primaryParam = this.getPrimaryKey(params.options);
 
    /* istanbul ignore next */
-   if (!saved[primaryParams]) {
+   if (!saved[primaryParam]) {
     return saved;
    } else {
+    params.parsed.search.$and = [{ [primaryParam]: saved[primaryParam] }];
     return this.getOneOrFail(params);
    }
   }
