@@ -59,8 +59,27 @@ export class CrudRequestInterceptor
     } catch (error) {
      value.parsed.bbox = null;
     }
-    value.parsed.outSR = isNumber(+req.query.outSR) ? +req.query.outSR : null;
-    value.parsed.inSR = isNumber(+req.query.inSR) ? +req.query.inSR : null;
+    if (isNumber(+req.query.inSR)) {
+     value.parsed.inSR = isNumber(+req.query.inSR) ? +req.query.inSR : null;
+    } else if (typeof req.query.inSR === "string") {
+     try {
+      const parsed = JSON.parse(req.query.inSR);
+      if (parsed.wkid && isNumber(+parsed.wkid)) {
+       value.parsed.inSR = +parsed.wkid;
+      }
+     } catch (error) {}
+    }
+    if (isNumber(+req.query.outSR)) {
+     value.parsed.outSR = isNumber(+req.query.outSR) ? +req.query.outSR : null;
+    } else if (typeof req.query.outSR === "string") {
+     try {
+      const parsed = JSON.parse(req.query.outSR);
+      if (parsed.wkid && isNumber(+parsed.wkid)) {
+       value.parsed.outSR = +parsed.wkid;
+      }
+     } catch (error) {}
+    }
+
     value.parsed.filterGeo = req.body.filterGeo || null;
    }
 

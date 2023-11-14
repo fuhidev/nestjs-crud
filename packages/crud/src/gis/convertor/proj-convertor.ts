@@ -1,5 +1,5 @@
 import { GeoJSON } from "nest-crud-client";
-import proj4Lib from "proj4";
+import * as proj4Lib from "proj4";
 import { gisModuleOption } from "../token";
 
 // Định nghĩa chuỗi mã hóa cho WGS 1984 và VN2000
