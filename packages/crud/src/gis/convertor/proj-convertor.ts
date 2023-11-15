@@ -1,5 +1,5 @@
 import { GeoJSON } from "nest-crud-client";
-import * as proj4Lib from "proj4";
+import proj4Lib from "proj4";
 import { gisModuleOption } from "../token";
 
 // Định nghĩa chuỗi mã hóa cho WGS 1984 và VN2000
@@ -37,7 +37,7 @@ class ProjSimpleConvertor {
   return this._toProjection;
  }
 
- protected _proj4: proj4Lib.Converter;
+ protected _proj4: proj4.Converter;
  get convertor() {
   if (!this._proj4) {
    this._proj4 = proj4Lib(this.fromProjection, this.toProjection);
