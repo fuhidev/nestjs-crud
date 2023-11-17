@@ -153,4 +153,6 @@ export class ProjGeometryConvertor {
  };
 }
 
-export const proj4Convertor = new ProjGeometryConvertor();
+export const vn2000ToWgs84Convertor = new ProjGeometryConvertor({
+ outSR: 4326,
+});

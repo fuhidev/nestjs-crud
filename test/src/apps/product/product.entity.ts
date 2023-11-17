@@ -1,4 +1,4 @@
-import { GeoJSON } from 'nest-crud-client';
+import { GeoJSON } from 'nest-crud-server';
 import {
   Column,
   CreateDateColumn,

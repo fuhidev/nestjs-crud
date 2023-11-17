@@ -13,7 +13,7 @@ import { TypeOrmCrudService } from "../typeorm/typeorm-crud.service";
 import {
  ProjGeometryConvertor,
  ProjSupportType,
- proj4Convertor,
+ vn2000ToWgs84Convertor,
 } from "./convertor/proj-convertor";
 import { geojsonToWkt } from "./convertor/wkt-convertor";
 import { ProjectGeometryService } from "./project-geometry";
@@ -45,7 +45,9 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
   pAlias = this.alias
  ) {
   const geoColumn = this.getGeometryColumn();
-  let geoFilter = proj4Convertor.convert(filterGeo.geometry as ProjSupportType);
+  let geoFilter = vn2000ToWgs84Convertor.reverse(
+   filterGeo.geometry as ProjSupportType
+  );
   let wktGeo = geojsonToWkt(geoFilter);
   if (wktGeo) {
    const stMethod =
@@ -69,7 +71,7 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
  ) {
   const geoColumn = this.getGeometryColumn();
 
-  const pGeo = proj4Convertor.convert({
+  const pGeo = vn2000ToWgs84Convertor.reverse({
    type: "Polygon",
    coordinates: [
     [
