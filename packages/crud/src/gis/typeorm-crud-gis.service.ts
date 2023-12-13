@@ -1,6 +1,11 @@
 import { BadRequestException } from "@nestjs/common";
 import { Envelope, QueryFilterGeo, SpatialMethodEnum } from "nest-crud-client";
-import { DeepPartial, Repository, SelectQueryBuilder } from "typeorm";
+import {
+ DeepPartial,
+ FindOptionsWhere,
+ Repository,
+ SelectQueryBuilder,
+} from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { CrudRequest, GetManyDefaultResponse } from "../interfaces";
 import {
@@ -199,7 +204,10 @@ export class GISTypeOrmCrudService<T> extends TypeOrmCrudService<T> {
   const primaryField = this.primaryColumn;
   const primaryKeyVal = dto[primaryField] as string | number;
   if (primaryKeyVal !== undefined) {
-   entity = await this.repo.findOne({ [primaryField]: primaryKeyVal });
+   entity = await this.repo.findOne({
+    where: { [primaryField]: primaryKeyVal } as FindOptionsWhere<T>,
+    select: [primaryField as keyof T],
+   });
    if (entity) {
     throw new BadRequestException("Đã tồn tại khóa chính");
    }
